@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="Four interactive examples for interpreting regression coefficients. FMPH 221, Topic 4.">
+<title>Topic 4 · Interpretation of main effects</title>
+<style>
+:root{--ink:#242d35;--muted:#5a666d;--paper:#fff;--wash:#f6f7f5;--line:#dce1df;--grid:#edf0ed;--teal:#126d70;--orange:#ae552c;--gray:#839097;--focus:#005fc3;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--paper);font-synthesis:none}
+*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button,select,summary,input[type=range]{cursor:pointer}button,select,input[type=number]{color:var(--ink);background:var(--paper);border:1px solid #aeb9b5;border-radius:4px}button{padding:10px 14px}button:hover{background:var(--wash)}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:4px}[hidden]{display:none!important}.wrap{max-width:1220px;margin:0 auto;padding:32px 40px 24px}.masthead{display:flex;justify-content:space-between;align-items:baseline;gap:20px}.course{font-size:13px;color:var(--muted);white-space:nowrap}.topic{font-size:13px;color:var(--muted);margin:0 0 9px}h1{font-size:34px;line-height:1.2;letter-spacing:-.035em;font-weight:500;margin:0;font-family:Georgia,"Times New Roman",serif}h2{font-size:25px;line-height:1.3;letter-spacing:-.02em;font-weight:500;margin:0 0 8px}p{margin:0;line-height:1.55}.tabs{display:flex;gap:28px;border-bottom:1px solid var(--line);margin:27px 0 30px}.tabs button{background:none;border:0;border-bottom:2px solid transparent;border-radius:0;padding:12px 0 13px;color:var(--muted);font-size:15px;text-align:left}.tabs button[aria-selected=true]{border-bottom-color:var(--teal);color:var(--ink);font-weight:600}.tabnum{margin-right:8px;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}.intro{max-width:930px;margin-bottom:22px}.intro p{color:var(--muted);font-size:16px}.equation{font-family:Georgia,"Times New Roman",serif;font-size:20px;line-height:1.55;letter-spacing:.005em}.model{background:var(--wash);padding:14px 18px;margin:0 0 24px;border-radius:3px;overflow-wrap:anywhere}.model .caption{margin-top:5px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 305px;gap:36px;align-items:start}.figure{margin:0;min-width:0}.chart{display:block;width:100%;height:340px;overflow:visible}.chart text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;fill:var(--muted);font-size:13px}.chart .axis-title{font-size:13px;fill:var(--ink)}.chart .mark-label{fill:var(--ink);font-size:14px}.chart .baseline-label{fill:var(--muted);font-size:12px}.chart-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:5px;font-size:14px}.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--muted)}.legend span{display:inline-flex;gap:6px;align-items:center}.swatch{display:inline-block;width:19px;border-top:2px solid var(--teal)}.swatch.gray{border-top-color:var(--gray);border-top-style:dashed}.caption{font-size:12px;color:var(--muted);line-height:1.5}.figure figcaption{margin:9px 0 0}.aside{border-left:1px solid var(--line);padding-left:28px}.field{margin-bottom:23px}.field-label{display:flex;gap:12px;justify-content:space-between;align-items:baseline;font-size:14px;margin-bottom:12px}.field-label output{font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}input[type=range]{width:100%;margin:3px 0;height:21px;accent-color:var(--teal)}.ends{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:2px}select{padding:10px 32px 10px 10px;width:100%;font-size:14px;min-height:42px}input[type=number]{width:102px;padding:8px;text-align:right;font-variant-numeric:tabular-nums;min-height:40px}.value{font-size:35px;font-weight:500;letter-spacing:-.035em;line-height:1.2;font-variant-numeric:tabular-nums;margin:4px 0 10px}.value.compact{font-size:29px}.result{padding-top:21px;border-top:1px solid var(--line)}.result-label{font-size:12px;color:var(--muted);margin-bottom:7px}.result p{font-size:15px}.calc{font-size:16px;margin-top:13px;font-family:Georgia,"Times New Roman",serif;line-height:1.55}.small-note{font-size:13px;color:var(--muted);margin-top:14px;line-height:1.5}.fixed{font-size:13px;color:var(--muted);line-height:1.6;margin-top:12px}.question{border-top:1px solid var(--line);margin-top:26px;padding-top:17px}.question summary{font-size:15px;line-height:1.5;width:fit-content}.answer{max-width:1000px;font-size:14px;padding:14px 0 4px}.answer p+p{margin-top:10px}.answer .equation{font-size:18px;margin:12px 0}.answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:14px 0}.answer-label{font-size:12px;color:var(--muted);margin-bottom:4px}.mini-value{font-size:21px;font-variant-numeric:tabular-nums}.source{display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--line);padding-top:16px;margin-top:26px;color:var(--muted);font-size:11px;line-height:1.5}.number-field{display:flex;align-items:center;justify-content:space-between;gap:12px}.number-field label{font-size:14px}.log-context{font-size:13px;color:var(--muted);margin-top:7px}.emph{color:var(--teal)}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.figure figcaption{font-size:13px;line-height:1.5;color:var(--muted)}
+@media(min-width:681px) and (max-height:950px){.wrap{padding-top:24px}.tabs{margin:18px 0 22px}.intro{margin-bottom:16px}.model{padding:12px 16px;margin-bottom:18px}.chart{height:300px}.field{margin-bottom:16px}.field-label{margin-bottom:9px}.result{padding-top:16px}.question{margin-top:20px;padding-top:14px}.source{margin-top:20px;padding-top:12px}}
+@media(min-width:1500px){.wrap{padding-top:38px}.chart{height:360px}.tabs{margin-bottom:30px}}
+@media(max-width:850px){.wrap{padding:24px}.masthead{align-items:start}.course{font-size:12px}.layout{grid-template-columns:minmax(0,1fr) 265px;gap:22px}.aside{padding-left:20px}.tabs{gap:23px}h1{font-size:29px}.equation{font-size:18px}.chart{height:320px}}
+@media(max-width:680px){.wrap{padding:22px 18px}.masthead{display:block}.course{margin-top:12px}h1{font-size:30px}.tabs{gap:0;justify-content:space-between;margin:20px 0 24px}.tabs button{font-size:13px;padding:12px 4px}.tabnum{display:none}h2{font-size:23px}.intro p{font-size:15px}.model{padding:13px 14px;margin-bottom:19px}.equation{font-size:18px}.layout{display:flex;flex-direction:column;gap:24px}.figure,.aside{width:100%}.aside{padding-left:0;border-left:0;display:grid;grid-template-columns:1fr 1fr;gap:0 24px}.aside .result{grid-column:1 / -1}.aside .fixed{grid-column:1 / -1}.chart{height:310px}.chart-head{font-size:13px}.legend{gap:10px}.source{display:block}.source span{display:block;margin-bottom:5px}.answer-grid{grid-template-columns:1fr;gap:15px}.value{font-size:32px}.question{margin-top:24px}}
+@media(max-width:390px){.aside{grid-template-columns:1fr}.chart{height:290px}.tabs button{font-size:12px}.chart-head{display:block}.chart-head>.caption{display:block;margin-top:5px}.legend{margin-top:6px}}
+@media print{.wrap{max-width:none;padding:0}.tabs{display:none}.masthead{margin-bottom:25px}.layout{display:block}.aside{border:0;padding:16px 0}.chart{height:290px}.source{margin-top:20px}.model{margin-bottom:12px}.intro{margin-bottom:12px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+ <header class="masthead"><div><p class="topic">Topic 4</p><h1>Interpretation of main effects</h1></div><p class="course">FMPH 221 · Fall 2026</p></header>
+ <nav class="tabs" role="tablist" aria-label="Lecture sections">
+  <button id="tab-hold" role="tab" aria-selected="true" aria-controls="panel-hold" data-tab="hold"><span class="tabnum">01</span>Hold fixed</button>
+  <button id="tab-recode" role="tab" aria-selected="false" aria-controls="panel-recode" tabindex="-1" data-tab="recode"><span class="tabnum">02</span>Change variables</button>
+  <button id="tab-collinear" role="tab" aria-selected="false" aria-controls="panel-collinear" tabindex="-1" data-tab="collinear"><span class="tabnum">03</span>Collinearity</button>
+  <button id="tab-logs" role="tab" aria-selected="false" aria-controls="panel-logs" tabindex="-1" data-tab="logs"><span class="tabnum">04</span>Log scales</button>
+ </nav>
+
+ <section id="panel-hold" class="panel" role="tabpanel" aria-labelledby="tab-hold" tabindex="0">
+  <div class="intro"><h2>A coefficient describes a specific comparison.</h2><p>Compare income at the same tax rate, driver licensing rate, and highway mileage.</p></div>
+  <div class="model"><div class="equation">Predicted fuel = 154.193 − 4.228 Tax + 0.472 Dlic <span class="emph">− 6.135 Income</span> + 26.755 ln(Miles)</div></div>
+  <div class="layout">
+   <figure class="figure"><div class="chart-head"><span>Predicted mean fuel use</span><div class="legend"><span><i class="swatch"></i><span id="fuel-legend">Tax = 20¢</span></span><span id="fuel-reference" hidden><i class="swatch gray"></i>Tax = 20¢</span></div></div><svg id="fuel-chart" class="chart" role="img" aria-label="Predicted fuel use at two income levels, with other predictors held fixed"></svg><figcaption>Illustrative profiles: Dlic = 900 per 1,000 residents age 16+, Miles = 10,000. Fuel is gallons sold per resident age 16+. The line shows a state-level adjusted association.</figcaption></figure>
+   <aside class="aside" aria-label="Income comparison controls">
+    <div class="field"><label class="field-label" for="income-change"><span>Income increase</span><output id="income-value" for="income-change">$5,000</output></label><input id="income-change" type="range" min="1" max="10" step="1" value="5"><div class="ends"><span>$1,000</span><span>$10,000</span></div></div>
+    <div class="field"><label class="field-label" for="tax"><span>Tax rate for both profiles</span><output id="tax-value" for="tax">20¢</output></label><input id="tax" type="range" min="10" max="40" step="1" value="20"><div class="ends"><span>10¢/gallon</span><span>40¢/gallon</span></div></div>
+    <div class="result" aria-live="polite"><div class="result-label">Difference in predicted mean fuel use</div><div id="fuel-difference" class="value">−30.68</div><p id="fuel-reading"></p><div id="fuel-calculation" class="calc"></div></div>
+   </aside>
+  </div>
+  <details class="question"><summary>What does the intercept mean?</summary><div class="answer"><p>The intercept is the predicted mean when every regressor is zero. Here, ln(Miles) = 0 means Miles = 1. Zero tax, zero licensing, and zero income make this intercept difficult to interpret substantively. Centering predictors gives the intercept a more useful reference profile.</p><p>Income is measured in thousands of dollars. Its coefficient has units of gallons per person per $1,000. Changing tax moves both profiles together, so the income difference stays the same in this additive model.</p><p>A causal interpretation requires an appropriate study design and assumptions. The fitted state-level association alone does not establish that increasing income reduces fuel use.</p></div></details>
+ </section>
+
+ <section id="panel-recode" class="panel" role="tabpanel" aria-labelledby="tab-recode" tabindex="0" hidden>
+  <div class="intro"><h2>Changing variables changes what “held fixed” means.</h2><p>Berkeley guidance study: interpret weight at age 2 while holding later weights or later weight gains fixed.</p></div>
+  <div class="model"><div id="weight-model" class="equation"></div><p id="weight-model-note" class="caption"></p></div>
+  <div class="layout">
+   <figure class="figure"><div class="chart-head"><span>What changes in this comparison?</span></div><svg id="weight-chart" class="chart" role="img" aria-label="Weight changes at ages 2, 9, and 18 under the selected comparison"></svg><figcaption>Illustrative baseline profile: 12 kg at age 2, 30 kg at age 9, and 60 kg at age 18. Bars show the change from that profile.</figcaption></figure>
+   <aside class="aside" aria-label="Weight comparison controls">
+    <div class="field"><label class="field-label" for="weight-hold">Hold fixed</label><select id="weight-hold"><option value="weights">Weights at ages 9 and 18</option><option value="gains">Weight gains (2–9, 9–18)</option></select></div>
+    <div class="field"><label class="field-label" for="weight-change"><span>Weight increase at age 2</span><output id="weight-value" for="weight-change">2 kg</output></label><input id="weight-change" type="range" min="1" max="4" step="0.5" value="2"><div class="ends"><span>1 kg</span><span>4 kg</span></div></div>
+    <div class="result" aria-live="polite"><div class="result-label">Difference in predicted BMI at age 18</div><div id="weight-difference" class="value"></div><p id="weight-reading"></p><div id="weight-calculation" class="calc"></div></div>
+   </aside>
+  </div>
+  <details class="question"><summary>Why are the fitted values unchanged?</summary><div class="answer"><p>Define G<sub>2–9</sub> = WT9 − WT2 and G<sub>9–18</sub> = WT18 − WT9. Substitute WT9 = WT2 + G<sub>2–9</sub> and WT18 = WT2 + G<sub>2–9</sub> + G<sub>9–18</sub> into the original model.</p><div class="equation">β₀ + β₂ WT2 + β₉ WT9 + β₁₈ WT18<br>= β₀ + (β₂ + β₉ + β₁₈) WT2 + (β₉ + β₁₈) G<sub>2–9</sub> + β₁₈ G<sub>9–18</sub></div><p>Both parameterizations give the same fitted BMI for any weight profile, with identical residuals and R². Each WT2 coefficient answers a different conditional question.</p><div class="answer-grid"><div><div class="answer-label">Selected profile, original variables</div><div class="mini-value" id="weight-original"></div></div><div><div class="answer-label">Same profile, weight-gain variables</div><div class="mini-value" id="weight-recoded"></div></div></div><p class="caption">Calculations use the unrounded textbook fit. Displayed coefficients are rounded to three decimals. Including all three weights and both gains creates exact linear dependencies.</p></div></details>
+ </section>
+
+ <section id="panel-collinear" class="panel" role="tabpanel" aria-labelledby="tab-collinear" tabindex="0" hidden>
+  <div class="intro"><h2>Predictor overlap makes individual slopes less precise.</h2><p>As two predictors become more alike, the data contain less information to separate their associations with Y.</p></div>
+  <div class="model"><div class="equation">Y = β₀ + β₁ X₁ + β₂ X₂ + ε</div><p class="caption">Simulation with 60 observations. Predictor variances and error variance stay fixed.</p></div>
+  <div class="layout">
+   <figure class="figure"><div class="chart-head"><span>Two standardized predictors</span><span id="correlation-caption" class="caption"></span></div><svg id="correlation-chart" class="chart" role="img" aria-label="Simulated predictor pairs with adjustable correlation"></svg><figcaption>The same underlying points are used throughout. The slider changes only the correlation between the two predictors.</figcaption></figure>
+   <aside class="aside" aria-label="Collinearity control">
+    <div class="field"><label class="field-label" for="correlation"><span>Correlation r</span><output id="correlation-value" for="correlation">0.80</output></label><input id="correlation" type="range" min="0" max="1" step="0.01" value="0.8"><div class="ends"><span>0</span><span>1</span></div></div>
+    <div class="result" aria-live="polite"><div class="result-label" id="se-label">Standard error relative to r = 0</div><div id="se-multiplier" class="value"></div><p id="correlation-reading"></p><div id="vif-calculation" class="calc"></div><p class="small-note" id="vif-note"></p></div>
+   </aside>
+  </div>
+  <details class="question"><summary>What happens if we drop a predictor?</summary><div class="answer"><p>The coefficient now describes a different comparison. Suppose E(Y | X₁, X₂) = β₀ + β₁X₁ + β₂X₂ and E(X₂ | X₁) = γ₀ + γ₁X₁. Averaging over X₂ gives:</p><div class="equation">E(Y | X₁) = (β₀ + β₂γ₀) + (β₁ + β₂γ₁)X₁</div><p>The slope becomes β₁ + β₂γ₁. Its sign can change. If X₁ and X₂ are independent, the slope remains β₁, while the intercept generally changes. Predictor choice should follow the scientific question and the intended interpretation.</p><p class="caption">For more than two predictors, VIFⱼ = 1 / (1 − Rⱼ²), where Rⱼ² comes from regressing Xⱼ on all the other predictors. These variance comparisons assume a correct linear mean, full rank, and constant, uncorrelated error variance.</p></div></details>
+ </section>
+
+ <section id="panel-logs" class="panel" role="tabpanel" aria-labelledby="tab-logs" tabindex="0" hidden>
+  <div class="intro"><h2>Translate the coefficient back to the original scale.</h2><p>Use an absolute change when Y is untransformed and a ratio when the model is for ln(Y).</p></div>
+  <div class="model"><div id="log-equation" class="equation"></div><p id="log-context" class="caption"></p></div>
+  <div class="layout">
+   <figure class="figure"><div class="chart-head"><span id="log-chart-title"></span></div><svg id="log-chart" class="chart" role="img" aria-label="Original-scale response to a change in the predictor"></svg><figcaption id="log-caption"></figcaption></figure>
+   <aside class="aside" aria-label="Log model controls">
+    <div class="field"><label class="field-label" for="log-model">Transformation</label><select id="log-model"><option value="logx">Log X: Y ~ ln(X)</option><option value="logy">Log Y: ln(Y) ~ X</option><option value="loglog">Log X and Y: ln(Y) ~ ln(X)</option></select></div>
+    <div class="field number-field"><label for="log-beta">Coefficient β</label><input id="log-beta" type="number" value="26.755" min="-50" max="50" step="0.001" inputmode="decimal"></div>
+    <div class="field"><label class="field-label" for="log-change"><span id="log-change-label">Increase in highway miles</span><output id="log-change-value" for="log-change"></output></label><input id="log-change" type="range" min="0" max="100" step="1" value="10"><div class="ends"><span id="log-change-min">0%</span><span id="log-change-max">100%</span></div></div>
+    <div class="result" aria-live="polite"><div class="result-label" id="log-result-label"></div><div id="log-result" class="value"></div><p id="log-reading"></p><div id="log-calculation" class="calc"></div></div>
+   </aside>
+  </div>
+  <details class="question"><summary id="log-question"></summary><div class="answer" id="log-answer"></div></details>
+ </section>
+
+ <footer class="source"><span>Topic 4 · Weisberg, <i>Applied Linear Regression</i>, Ch. 4.<br>Examples: fuel2001, BGSgirls, and MinnWater. All logarithms are natural.</span><span id="source-pages">Lecture pages 3 to 5</span></footer>
+ <div id="live" class="sr-only" aria-live="polite"></div>
+</main>
+<script>
+(() => {
+ 'use strict';
+ const $ = id => document.getElementById(id);
+ const NS = 'http://www.w3.org/2000/svg';
+ const C = {ink:'#242d35',muted:'#5a666d',grid:'#edf0ed',line:'#dce1df',teal:'#126d70',orange:'#ae552c',gray:'#839097'};
+ const tabs = ['hold','recode','collinear','logs'];
+ const fuel = {a:154.19284457729663,tax:-4.227983208329682,dlic:0.4718712134419846,income:-6.135330970417415,miles:26.755175561800005};
+ const weight = {a:8.309779954728894,w2:-0.3866327269686646,w9:0.0314096732681224,w18:0.2874473250862812};
+ const state = {tab:'hold',income:5,tax:20,weightMode:'weights',weightChange:2,r:0.8,logMode:'logx',logBeta:26.755175561800005,logChange:10};
+ const fmt = (x,n=2) => {if(!Number.isFinite(x))return '∞'; const y=Math.abs(x)<0.5*10**(-n)?0:x; return y.toLocaleString('en-US',{minimumFractionDigits:n,maximumFractionDigits:n}).replace('-','−');};
+ const signed = (x,n=2) => (x>0?'+':'')+fmt(x,n);
+ const text = (id,value) => {$(id).textContent=value;};
+ function el(parent,tag,attrs={},content){const node=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))node.setAttribute(k,String(v));if(content!==undefined)node.textContent=content;parent.appendChild(node);return node;}
+ function ticks(lo,hi,count=5){const raw=(hi-lo)/count,p=10**Math.floor(Math.log10(raw)),m=raw/p,step=(m<=1?1:m<=2?2:m<=5?5:10)*p;const out=[];for(let v=Math.ceil(lo/step)*step;v<=hi+step*1e-8;v+=step)out.push(Math.abs(v)<1e-10?0:v);return out;}
+ function chart(id,xd,yd,xlabel,ylabel,xticks){
+  const svg=$(id),w=Math.max(280,svg.getBoundingClientRect().width||640),h=svg.getBoundingClientRect().height||340,L=w<380?53:63,R=22,T=30,B=55;
+  svg.replaceChildren();svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  const sx=x=>L+(x-xd[0])/(xd[1]-xd[0])*(w-L-R),sy=y=>h-B-(y-yd[0])/(yd[1]-yd[0])*(h-T-B);
+  const ys=ticks(yd[0],yd[1],4),xs=xticks||ticks(xd[0],xd[1],w<400?3:5);
+  for(const y of ys){el(svg,'line',{x1:L,x2:w-R,y1:sy(y),y2:sy(y),stroke:C.grid});el(svg,'text',{x:L-10,y:sy(y)+4,'text-anchor':'end'},fmt(y,Math.abs(y)%1>1e-8?1:0));}
+  for(const x of xs){el(svg,'line',{x1:sx(x),x2:sx(x),y1:h-B,y2:h-B+5,stroke:C.gray});el(svg,'text',{x:sx(x),y:h-B+23,'text-anchor':'middle'},fmt(x,Math.abs(x*10-Math.round(x*10))>1e-8?2:Math.abs(x)%1>1e-8?1:0));}
+  el(svg,'line',{x1:L,x2:w-R,y1:h-B,y2:h-B,stroke:C.line});
+  el(svg,'text',{x:L,y:14,class:'axis-title'},ylabel);
+  el(svg,'text',{x:(L+w-R)/2,y:h-8,'text-anchor':'middle',class:'axis-title'},xlabel);
+  const defs=el(svg,'defs');el(el(defs,'clipPath',{id:id+'-clip'}),'rect',{x:L,y:T,width:w-L-R,height:h-T-B});
+  const g=el(svg,'g',{'clip-path':`url(#${id}-clip)`});return {svg,g,w,h,L,R,T,B,sx,sy,xd,yd};
+ }
+ function curve(ch,fn,color=C.teal,dash=''){const d=Array.from({length:161},(_,i)=>{const x=ch.xd[0]+(ch.xd[1]-ch.xd[0])*i/160;return `${i?'L':'M'}${ch.sx(x)} ${ch.sy(fn(x))}`;}).join(' ');el(ch.g,'path',{d,fill:'none',stroke:color,'stroke-width':2.5,'stroke-dasharray':dash});}
+ function dot(ch,x,y,color=C.teal,r=5){el(ch.g,'circle',{cx:ch.sx(x),cy:ch.sy(y),r,fill:color,stroke:'#fff','stroke-width':1.5});}
+ function guide(ch,x,y){el(ch.g,'line',{x1:ch.sx(x),x2:ch.sx(x),y1:ch.sy(y),y2:ch.h-ch.B,stroke:C.gray,'stroke-dasharray':'3 4'});}
+ function fuelAt(income,tax){return fuel.a+fuel.tax*tax+fuel.dlic*900+fuel.income*income+fuel.miles*Math.log(10000);}
+ function hold(){
+  const a=30,b=30+state.income,ya=fuelAt(a,state.tax),yb=fuelAt(b,state.tax),diff=yb-ya;
+  const ch=chart('fuel-chart',[20,45],[350,700],'Income ($1,000)','Fuel (gallons/person)',[20,25,30,35,40,45]);
+  if(state.tax!==20)curve(ch,x=>fuelAt(x,20),C.gray,'5 5');curve(ch,x=>fuelAt(x,state.tax));
+  guide(ch,a,ya);guide(ch,b,yb);dot(ch,a,ya);dot(ch,b,yb);
+  el(ch.svg,'text',{x:ch.sx(a)-8,y:ch.sy(ya)-13,'text-anchor':'end',class:'mark-label'},fmt(ya,1));
+  el(ch.svg,'text',{x:ch.sx(b)+8,y:ch.sy(yb)+24,class:'mark-label'},fmt(yb,1));
+  el(ch.g,'line',{x1:ch.sx(a),x2:ch.sx(b),y1:ch.sy(ya),y2:ch.sy(ya),stroke:C.teal,'stroke-dasharray':'3 4'});
+  el(ch.g,'line',{x1:ch.sx(b),x2:ch.sx(b),y1:ch.sy(ya),y2:ch.sy(yb),stroke:C.teal,'stroke-width':2});
+  text('income-value','$'+(1000*state.income).toLocaleString('en-US'));text('tax-value',state.tax+'¢');text('fuel-legend',`Tax = ${state.tax}¢`);$('fuel-reference').hidden=state.tax===20;
+  text('fuel-difference',fmt(diff)+' gal/person');text('fuel-reading',`A $${(1000*state.income).toLocaleString('en-US')} higher income is associated with ${fmt(-diff)} fewer gallons per person, holding the other predictors fixed.`);
+  text('fuel-calculation',`Δŷ = −6.135 × ${state.income} ≈ ${fmt(diff)}`);
+  $('fuel-chart').setAttribute('aria-label',`At tax ${state.tax} cents, predicted fuel is ${fmt(ya)} gallons at $30,000 income and ${fmt(yb)} gallons at $${b*1000} income. Difference ${fmt(diff)} gallons per person.`);
+ }
+ const weightOriginal = w => weight.a+weight.w2*w[0]+weight.w9*w[1]+weight.w18*w[2];
+ const weightRecoded = w => weight.a+(weight.w2+weight.w9+weight.w18)*w[0]+(weight.w9+weight.w18)*(w[1]-w[0])+weight.w18*(w[2]-w[1]);
+ function recode(){
+  const gain=state.weightMode==='gains',delta=state.weightChange,changes=gain?[delta,delta,delta]:[delta,0,0],profile=[12+changes[0],30+changes[1],60+changes[2]],slope=gain?weight.w2+weight.w9+weight.w18:weight.w2,diff=slope*delta;
+  $('weight-model').innerHTML=gain?'Predicted BMI18 = 8.310 <span class="emph">− 0.068 WT2</span> + 0.319 G<sub>2–9</sub> + 0.287 G<sub>9–18</sub>':'Predicted BMI18 = 8.310 <span class="emph">− 0.387 WT2</span> + 0.031 WT9 + 0.287 WT18';
+  text('weight-model-note',gain?'G₂–₉ = WT9 − WT2. G₉–₁₈ = WT18 − WT9. Weights and gains are in kg.':'WT2, WT9, and WT18 are weights in kg at ages 2, 9, and 18.');
+  const ch=chart('weight-chart',[0.4,3.6],[0,4.6],'Age (years)','Weight change (kg)',[]),bw=Math.min(78,(ch.w-ch.L-ch.R)/5);
+  changes.forEach((v,i)=>{const x=i+1;el(ch.g,'rect',{x:ch.sx(x)-bw/2,y:ch.sy(v),width:bw,height:ch.sy(0)-ch.sy(v),fill:C.teal,opacity:0.85});if(v===0)el(ch.g,'line',{x1:ch.sx(x)-bw/2,x2:ch.sx(x)+bw/2,y1:ch.sy(0)-1,y2:ch.sy(0)-1,stroke:C.gray,'stroke-width':2});el(ch.svg,'text',{x:ch.sx(x),y:ch.sy(v)-12,'text-anchor':'middle',class:'mark-label'},v?signed(v,1)+' kg':'Fixed');el(ch.svg,'text',{x:ch.sx(x),y:ch.h-ch.B+23,'text-anchor':'middle'},[2,9,18][i]);});
+  text('weight-value',fmt(delta,1)+' kg');text('weight-difference',fmt(diff,3)+' BMI units');
+  text('weight-reading',gain?`All three weights rise by ${fmt(delta,1)} kg, preserving both gains. The WT2 coefficient is about −0.068.`:`Weight at age 2 rises by ${fmt(delta,1)} kg while weights at ages 9 and 18 stay fixed. The WT2 coefficient is about −0.387.`);
+  text('weight-calculation',`Δŷ = β(WT2) × ${fmt(delta,1)} ≈ ${fmt(diff,3)}`);
+  text('weight-original',fmt(weightOriginal(profile),4));text('weight-recoded',fmt(weightRecoded(profile),4));
+  $('weight-chart').setAttribute('aria-label',`Weight differences at ages 2, 9, and 18 are ${changes.join(', ')} kilograms. Predicted BMI difference ${fmt(diff,3)}.`);
+ }
+ function orthogonalPoints(n=60){
+  let seed=2214;const rand=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return (seed+.5)/4294967296;};
+  const normal=()=>Math.sqrt(-2*Math.log(rand()))*Math.cos(2*Math.PI*rand());
+  const normalize=v=>{const m=v.reduce((a,b)=>a+b,0)/v.length,c=v.map(x=>x-m),s=Math.sqrt(c.reduce((a,b)=>a+b*b,0)/(v.length-1));return c.map(x=>x/s);};
+  const u=normalize(Array.from({length:n},normal)),w=normalize(Array.from({length:n},normal)),d=u.reduce((s,x,i)=>s+x*w[i],0)/(n-1),v=normalize(w.map((x,i)=>x-d*u[i]));return {u,v};
+ }
+ const base=orthogonalPoints();
+ const predictorPoints=r=>base.u.map((x,i)=>[x,r*x+Math.sqrt(Math.max(0,1-r*r))*base.v[i]]);
+ function collinear(){
+  const r=state.r,pts=predictorPoints(r),ch=chart('correlation-chart',[-3.5,3.5],[-3.5,3.5],'X₁ (standardized)','X₂ (standardized)',[-3,-2,-1,0,1,2,3]);
+  el(ch.g,'line',{x1:ch.sx(-3.5),x2:ch.sx(3.5),y1:ch.sy(0),y2:ch.sy(0),stroke:C.line});el(ch.g,'line',{x1:ch.sx(0),x2:ch.sx(0),y1:ch.sy(-3.5),y2:ch.sy(3.5),stroke:C.line});
+  pts.forEach(([x,y])=>el(ch.g,'circle',{cx:ch.sx(x),cy:ch.sy(y),r:3.7,fill:C.teal,opacity:.65}));
+  text('correlation-value',fmt(r));text('correlation-caption',`r² = ${fmt(r*r,3)}`);
+  if(r===1){text('se-label','Individual slopes at exact collinearity');text('se-multiplier','Not identifiable');$('se-multiplier').classList.add('compact');text('correlation-reading','X₁ = X₂. The data identify β₁ + β₂, while individual slopes are not unique.');text('vif-calculation','1 − r² = 0');text('vif-note','As r approaches 1, VIF grows without bound. At r = 1, the model matrix loses rank.');}
+  else{const vif=1/(1-r*r),factor=Math.sqrt(vif);text('se-label','Standard error relative to r = 0');$('se-multiplier').classList.remove('compact');text('se-multiplier',fmt(factor)+'×');text('correlation-reading',r===0?'The predictors are uncorrelated. Each slope uses variation independent of the other predictor.':`Each coefficient’s standard error is ${fmt(factor)} times as large, with predictor spread and error variance held fixed.`);text('vif-calculation',`VIF = 1 / (1 − r²) = ${fmt(vif)}`);text('vif-note','VIF multiplies the variance. √VIF multiplies the standard error.');}
+  $('correlation-chart').setAttribute('aria-label',`Sixty simulated predictor pairs with correlation ${fmt(r)}. ${$('correlation-reading').textContent}`);
+ }
+ const logDefaults={logx:{beta:fuel.miles,change:10,min:-50,max:50,step:.001},logy:{beta:.0124,change:1,min:-.2,max:.2,step:.0001},loglog:{beta:1,change:10,min:-3,max:3,step:.1}};
+ function logValues(mode,beta,change){const c=1+change/100;if(mode==='logx')return {change:beta*Math.log(c),ratio:null};const ratio=mode==='logy'?Math.exp(beta*change):Math.pow(c,beta);return {change:100*(ratio-1),ratio};}
+ function logs(){
+  const mode=state.logMode,b=state.logBeta,change=state.logChange,out=logValues(mode,b,change),isX=mode==='logx',isY=mode==='logy',bd=fmt(b,isY?4:3),factor=1+change/100;
+  const fn=isX?x=>b*Math.log(x):isY?x=>100*Math.exp(b*x):x=>100*Math.pow(x,b),xd=isY?[0,20]:[1,2],baseline=isX?0:100,target=isY?change:factor,y=fn(target),ends=[fn(xd[0]),fn(xd[1]),baseline],span=Math.max(1,...ends)-Math.min(...ends),pad=Math.max(isX?2:8,span*.12),yd=[Math.min(...ends)-pad,Math.max(...ends)+pad];
+  $('log-change').max=isY?'20':'100';$('log-change').value=change;text('log-change-label',isY?'Years elapsed':isX?'Increase in highway miles':'Increase in population');text('log-change-value',isY?change+(change===1?' year':' years'):change+'%');text('log-change-min',isY?'0 years':'0%');text('log-change-max',isY?'20 years':'100%');
+  const term=(b<0?'− ':'+ ')+fmt(Math.abs(b),isY?4:3);
+  text('log-equation',isX?`Mean fuel = α ${term} ln(Miles) + other terms`:isY?`E[ln(Water use) | Year] = α ${term} Year`:`E[ln(Water use) | Population] = α ${term} ln(Population)`);
+  text('log-context',isX?'Starting coefficient: 26.755 from the fuel model. Other predictors stay fixed.':isY?'Starting coefficient: 0.0124 per year from the Minnesota water example.':'Starting coefficient: approximately 1 in the population-only Minnesota water model.');
+  text('log-chart-title',isX?'Change in mean fuel use':'Geometric mean water use');
+  const ch=chart('log-chart',xd,yd,isY?'Years since baseline':isX?'Highway miles (× baseline)':'Population (× baseline)',isX?'Fuel change (gal/person)':'Water use (baseline = 100)',isY?[0,5,10,15,20]:[1,1.25,1.5,1.75,2]);
+  el(ch.g,'line',{x1:ch.L,x2:ch.w-ch.R,y1:ch.sy(baseline),y2:ch.sy(baseline),stroke:C.gray,'stroke-dasharray':'4 4'});curve(ch,fn);guide(ch,target,y);dot(ch,xd[0],baseline,C.gray,4);dot(ch,target,y);
+  const labelX=ch.sx(target),anchor=target>(xd[0]+xd[1])/2?'end':'start',labelY=ch.sy(y)-14<ch.T?ch.sy(y)+23:ch.sy(y)-14;
+  el(ch.svg,'text',{x:labelX+(anchor==='end'?-9:9),y:labelY,'text-anchor':anchor,class:'mark-label'},isX?signed(y):fmt(y,1));
+  text('log-result-label',isX?'Change in predicted mean fuel use':'Change in conditional geometric mean');text('log-result',signed(out.change)+(isX?' gal/person':'%'));
+  text('log-reading',isX?`A ${change}% increase in miles gives an absolute change of ${signed(out.change)} gallons per person.`:isY?`After ${change} ${change===1?'year':'years'}, the geometric mean is multiplied by ${fmt(out.ratio,4)}.`:`A ${change}% increase in population multiplies the geometric mean by ${fmt(out.ratio,4)}.`);
+  text('log-calculation',isX?`Δŷ = ${bd} ln(${fmt(factor,2)})`:isY?`% change = 100[exp(${bd} × ${change}) − 1]`:`% change = 100[${fmt(factor,2)}^${bd} − 1]`);
+  text('log-caption',isX?'All other predictors stay fixed. The same percentage increase in X gives the same absolute change in the predicted mean.':'The curve is exp(E[ln(Y) | X]), indexed to 100 at baseline. This is the conditional geometric mean. Coefficients can be edited for illustration.');
+  text('log-question',isX?'Why use a ratio for X?':'When does this also describe the arithmetic mean?');
+  $('log-answer').innerHTML=isX?'<p>For a change from x to cx, the model gives ΔE(Y | X) = β[ln(cx) − ln(x)] = β ln(c). For a small percentage change p, this is approximately βp/100 in outcome units.</p><p>Interpret the change in the original predictor. For example, doubling highway miles gives β ln(2), with the other predictors fixed.</p>':'<p>Write ln(Y) = η(X) + ε. Then E(Y | X) = exp(η(X)) E(exp(ε) | X). The geometric-mean ratio also equals the arithmetic-mean ratio when the retransformation factor E(exp(ε) | X) is constant across the compared profiles, as with normal errors of constant variance on the log scale.</p><p>For ln(Y) ~ X, the exact percentage change is 100[exp(β ΔX) − 1]. For ln(Y) ~ ln(X), it is 100[c<sup>β</sup> − 1] when X is multiplied by c. The familiar 100β% per unit and β% per 1% increase are small-change approximations.</p>';
+  $('log-chart').setAttribute('aria-label',`${$('log-chart-title').textContent}. ${$('log-reading').textContent} Exact change ${signed(out.change)} ${isX?'gallons per person':'percent'}.`);
+ }
+ const renders={hold,recode,collinear,logs};
+ function render(){renders[state.tab]();}
+ function setTab(tab,focus=false){state.tab=tab;tabs.forEach(t=>{$('panel-'+t).hidden=t!==tab;$('tab-'+t).setAttribute('aria-selected',String(t===tab));$('tab-'+t).tabIndex=t===tab?0:-1;});text('source-pages',{hold:'Lecture pages 3 to 5',recode:'Lecture pages 6 to 10',collinear:'Lecture pages 11 to 15, 18 to 19',logs:'Lecture pages 16 to 17'}[tab]);render();if(focus)$('tab-'+tab).focus();}
+ document.querySelectorAll('[data-tab]').forEach(button=>{button.addEventListener('click',()=>setTab(button.dataset.tab));button.addEventListener('keydown',event=>{const i=tabs.indexOf(state.tab);let next;if(event.key==='ArrowRight')next=(i+1)%tabs.length;if(event.key==='ArrowLeft')next=(i+tabs.length-1)%tabs.length;if(event.key==='Home')next=0;if(event.key==='End')next=tabs.length-1;if(next!==undefined){event.preventDefault();setTab(tabs[next],true);}});});
+ for(const [id,key] of [['income-change','income'],['tax','tax'],['weight-change','weightChange'],['correlation','r'],['log-change','logChange']]){$(id).addEventListener('input',event=>{state[key]=Number(event.target.value);render();});}
+ $('weight-hold').addEventListener('change',event=>{state.weightMode=event.target.value;recode();});
+ $('log-model').addEventListener('change',event=>{state.logMode=event.target.value;const d=logDefaults[state.logMode];state.logBeta=d.beta;state.logChange=d.change;Object.assign($('log-beta'),{min:d.min,max:d.max,step:d.step,value:Number(d.beta.toFixed(state.logMode==='logy'?4:3))});logs();});
+ $('log-beta').addEventListener('input',event=>{const input=event.target,v=input.valueAsNumber;if(Number.isFinite(v)&&v>=Number(input.min)&&v<=Number(input.max)){input.setCustomValidity('');state.logBeta=v;logs();}else input.setCustomValidity(`Enter a number from ${input.min} to ${input.max}.`);});
+ $('log-beta').addEventListener('change',event=>{if(!event.target.checkValidity()){event.target.value=state.logBeta;event.target.setCustomValidity('');}});
+ let raf=0;new ResizeObserver(()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(render);}).observe(document.querySelector('.wrap'));
+ render();
+ // Exposed for numerical verification. No network requests or external dependencies.
+ window.lectureDemo={state,fuel,weight,fuelAt,weightOriginal,weightRecoded,predictorPoints,logValues,setTab,render};
+})();
+</script>
+</body>
+</html>

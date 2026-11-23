@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="A simple interactive introduction to leverage, outliers, influence, and residuals, based on FMPH 221 Lecture 8.">
+<title>Topic 8 · Regression diagnostics</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#242d35;background:#fff;font-synthesis:none;--ink:#242d35;--muted:#58656c;--line:#dce1df;--wash:#f5f7f6;--teal:#126d70;--orange:#b55225;--gray:#75828a;--focus:#005fc3}
+*{box-sizing:border-box}body{margin:0}button,input{font:inherit}button,input[type=range],summary{cursor:pointer}a{color:var(--teal)}button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:4px}[hidden]{display:none!important}.wrap{max-width:1230px;margin:0 auto;padding:30px 38px 24px}header{display:flex;justify-content:space-between;gap:20px;align-items:baseline}.eyebrow,.course{font-size:13px;color:var(--muted);margin:0 0 9px}.course{white-space:nowrap}h1{font:500 35px/1.2 Georgia,"Times New Roman",serif;letter-spacing:-.025em;margin:0}h2{font-size:21px;font-weight:600;line-height:1.3;margin:0 0 7px}h3{font-size:18px;font-weight:600;margin:0 0 6px}p{margin:0;line-height:1.5}.lead{font-size:16px;color:var(--muted);margin-top:10px}.concepts{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:25px 0;padding:20px 0}.concepts article+article{border-left:1px solid var(--line);padding-left:26px}.concepts h2{font-size:20px}.concepts .question{font-size:16px;color:var(--teal);font-weight:600;margin:0 0 6px}.concepts p{font-size:15px}.explore-head{display:flex;justify-content:space-between;gap:20px;align-items:baseline}.hint{font-size:14px;color:var(--muted)}.presets{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 22px}.presets button{border:1px solid #aeb9b5;border-radius:4px;background:#fff;color:var(--ink);padding:9px 13px;min-height:42px;font-size:14px}.presets button:hover{background:var(--wash)}.presets button[aria-pressed=true]{border-color:var(--teal);background:#eaf3f2;color:#095c60;box-shadow:inset 0 0 0 1px var(--teal)}.layout{display:grid;grid-template-columns:minmax(0,1fr) 276px;gap:30px}.figure{margin:0;min-width:0}.legend{display:flex;gap:18px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:13px;min-height:20px}.legend span{display:inline-flex;align-items:center;gap:6px}.swatch{width:21px;border-top:3px solid var(--teal);display:inline-block}.swatch.reference{border-color:var(--gray);border-top-style:dashed}.point-key{width:9px;height:9px;display:inline-block;background:var(--orange);border-radius:50%}.chart{display:block;width:100%;height:355px;touch-action:none}.chart text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:13px;fill:var(--muted)}.chart .axis-label{font-size:14px;fill:var(--ink)}.chart .point-label{font-size:14px;font-weight:600;fill:var(--orange)}.chart #selected-point{cursor:grab}.chart.dragging #selected-point{cursor:grabbing}figcaption{font-size:13px;color:var(--muted);line-height:1.5;min-height:39px}.aside{border-left:1px solid var(--line);padding-left:26px}.field{margin-bottom:19px}.field label{display:flex;justify-content:space-between;gap:12px;font-size:15px;font-weight:500}.field output{font-variant-numeric:tabular-nums;color:var(--orange)}input[type=range]{width:100%;accent-color:var(--orange);height:24px;margin:9px 0 0}.ends{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}.numbers{margin:6px 0 0}.metric{border-top:1px solid var(--line);padding:11px 0;display:grid;grid-template-columns:1fr auto;column-gap:10px;align-items:baseline}.metric dt{font-size:14px}.metric dd{margin:0;font-size:24px;font-weight:500;letter-spacing:-.02em;font-variant-numeric:tabular-nums}.metric p{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:3px}.metric .tag{font-size:12px;color:var(--teal)}.equations{font-size:13px;line-height:1.65;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;margin-top:2px}.equations strong{font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}.reading{margin:17px 0 21px;padding:15px 18px;background:var(--wash);border-left:3px solid var(--teal)}.reading h3{font-size:16px;margin-bottom:5px}.reading p{font-size:15px}.reading .takeaway{color:var(--teal);margin-top:5px;font-weight:500}.more{border-top:1px solid var(--line);padding:15px 0}.more summary{font-size:16px;font-weight:500;width:fit-content;line-height:1.5}.details-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px 34px;margin-top:20px}.term{font-size:15px}.term h3{font-size:16px}.term p+p{margin-top:7px}.formula{font-family:Georgia,"Times New Roman",serif;font-size:18px;line-height:1.7;overflow-wrap:anywhere}.small{font-size:13px;color:var(--muted)}.glossary{width:100%;border-collapse:collapse;margin-top:16px;font-size:14px;line-height:1.5}.glossary th,.glossary td{text-align:left;padding:11px 15px 11px 0;border-bottom:1px solid var(--line);vertical-align:top}.glossary th{font-weight:600}.glossary th:first-child{width:23%}.investigate{font-size:14px;line-height:1.55;margin:10px 0 18px}.source{border-top:1px solid var(--line);padding-top:14px;display:flex;justify-content:space-between;gap:18px;font-size:12px;line-height:1.5;color:var(--muted)}.source a{text-decoration:underline;text-underline-offset:2px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(min-width:1400px){.wrap{padding-top:38px}.chart{height:380px}.concepts{margin:28px 0;padding:23px 0}}
+@media(max-width:900px){.wrap{padding:25px}.layout{grid-template-columns:minmax(0,1fr) 240px;gap:20px}.aside{padding-left:20px}.legend{gap:10px}.concepts{gap:20px}.concepts article+article{padding-left:20px}h1{font-size:31px}.chart{height:350px}}
+@media(max-width:700px){.wrap{padding:22px 18px}header{display:block}.course{margin-top:12px}h1{font-size:31px}.concepts{grid-template-columns:1fr;gap:15px;margin:22px 0;padding:18px 0}.concepts article+article{padding:15px 0 0;border-left:0;border-top:1px solid var(--line)}.concepts h2{margin-bottom:3px}.concepts .question{margin-bottom:4px}.explore-head{display:block}.hint{margin-top:6px}.presets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}.presets button{padding:10px;font-size:13px}.layout{display:flex;flex-direction:column;gap:20px}.chart{height:330px}.legend{font-size:12px;gap:12px}.aside{padding:18px 0 0;border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:0 20px}.numbers{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:0}.metric{display:block}.metric dd{margin:6px 0}.metric p{font-size:12px}.equations{grid-column:1/-1}.reading{margin-top:20px}.details-grid{grid-template-columns:1fr;gap:22px}.glossary th:first-child{width:30%}.source{display:block}.source span{display:block;margin-top:5px}}
+@media print{.wrap{padding:0;max-width:none}.presets,.field,.hint{display:none}.concepts{break-inside:avoid}.layout{grid-template-columns:1fr 230px}.chart{height:300px}.reading{break-inside:avoid}.source{font-size:10px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+ <header><div><p class="eyebrow">Topic 8 · Regression diagnostics</p><h1>Leverage, outliers &amp; influence</h1></div><p class="course">UCSD · FMPH 221</p></header>
+ <p class="lead">Three questions about one observation.</p>
+
+ <section class="concepts" aria-label="Main concepts">
+  <article><h2>Leverage</h2><p class="question">Is its X unusual?</p><p>A point has high leverage when its predictor values are far from the rest. Leverage depends only on X and describes the <strong>potential</strong> to change the fit.</p></article>
+  <article><h2>Outlier</h2><p class="question">Is its Y unusual for that X?</p><p>A regression outlier departs from the model followed by the other observations. Judge Y relative to the expected response <strong>at that X</strong>.</p></article>
+  <article><h2>Influence</h2><p class="question">Does it change the fitted model?</p><p>A point is influential when leaving it out substantially changes the coefficients or fitted values. Influence describes its <strong>actual effect</strong> on the fit.</p></article>
+ </section>
+
+ <section aria-labelledby="explore-title">
+  <div class="explore-head"><h2 id="explore-title">Move one point. Compare the lines.</h2><p class="hint">Choose an example, then drag the orange point or use the sliders.</p></div>
+  <div class="presets" role="group" aria-label="Example scenarios">
+   <button type="button" data-preset="typical" aria-pressed="true">Typical point</button>
+   <button type="button" data-preset="outlier" aria-pressed="false">Outlier near the center</button>
+   <button type="button" data-preset="leverage" aria-pressed="false">High leverage, on trend</button>
+   <button type="button" data-preset="both" aria-pressed="false">High leverage + outlier</button>
+  </div>
+  <div class="layout">
+   <figure class="figure">
+    <div class="legend" aria-label="Plot legend"><span><i class="swatch"></i>Fit with point</span><span><i class="swatch reference"></i>Fit without point</span><span><i class="point-key"></i>Selected point</span></div>
+    <svg id="chart" class="chart" role="img" aria-labelledby="chart-title chart-desc"><title id="chart-title">Effect of one observation on a regression line</title><desc id="chart-desc">Use the sliders below to move the selected observation.</desc></svg>
+    <figcaption id="caption">The 20 gray observations stay fixed. Both lines are fitted by ordinary least squares.</figcaption>
+   </figure>
+   <aside class="aside" aria-label="Selected point controls and diagnostics">
+    <div class="field"><label for="point-x">Predictor X <output id="x-value" for="point-x">6.0</output></label><input id="point-x" type="range" min="0" max="20" step="0.1" value="6" aria-describedby="x-tip"><div class="ends" id="x-tip"><span>0</span><span>20</span></div></div>
+    <div class="field"><label for="point-y">Response Y <output id="y-value" for="point-y">7.5</output></label><input id="point-y" type="range" min="0" max="22" step="0.1" value="7.5"><div class="ends"><span>0</span><span>22</span></div></div>
+    <dl class="numbers">
+     <div class="metric"><dt>Leverage <i>h</i></dt><dd id="h-value">0.048</dd><p>Predictor position only</p></div>
+     <div class="metric"><dt>Studentized residual <i>r</i></dt><dd id="r-value">0.00</dd><p>Response discrepancy, scaled</p></div>
+     <div class="metric"><dt>Cook’s distance <i>D</i></dt><dd id="d-value">0.000</dd><p>Overall change in the fit</p></div>
+    </dl>
+    <div class="equations">With point: <strong id="with-equation">ŷ = 3.00 + 0.75x</strong><br>Without point: <strong>ŷ = 3.00 + 0.75x</strong></div>
+   </aside>
+  </div>
+  <div class="reading" aria-live="polite" aria-atomic="true"><h3 id="reading-title">Typical point</h3><p id="reading-text">The point lies near the center of X and follows the existing trend. The two fitted lines overlap.</p><p id="takeaway" class="takeaway">Low leverage, small residual, and little influence.</p></div>
+ </section>
+
+ <details class="more">
+  <summary>What do residuals and Cook’s distance measure?</summary>
+  <div class="details-grid">
+   <div class="term"><h3>Residual: the vertical gap</h3><p>The observed response minus its fitted value. The dotted orange segment shows this gap to the line fitted <strong>with</strong> the point.</p><p class="formula">e<sub>i</sub> = y<sub>i</sub> − ŷ<sub>i</sub></p><p class="small">A high-leverage point can pull the fitted line toward itself, making its raw residual look smaller.</p></div>
+   <div class="term"><h3>Studentized residual: a scaled gap</h3><p>Adjusts the residual for its expected variability. The error scale is estimated from the other observations.</p><p class="formula">r<sub>(i)</sub> = e<sub>i</sub> / [s<sub>(−i)</sub> √(1 − h<sub>i</sub>)]</p><p class="small">Larger |r| suggests a more unusual response. A formal outlier test also accounts for checking multiple observations.</p></div>
+   <div class="term"><h3>Leverage: distance in predictor space</h3><p>For one predictor and an intercept:</p><p class="formula">h<sub>i</sub> = 1/n + (x<sub>i</sub> − x̄)² / Σ<sub>j</sub>(x<sub>j</sub> − x̄)²</p><p class="small">All n = 21 observations enter this calculation. With several predictors, leverage reflects an unusual combination of predictor values. Changing only Y leaves h unchanged.</p></div>
+   <div class="term"><h3>Cook’s distance: change after leaving one out</h3><p>Summarizes how much <strong>all fitted values</strong> change when the selected observation is omitted from the fit.</p><p class="formula">D<sub>i</sub> = Σ<sub>j</sub>(ŷ<sub>j</sub> − ŷ<sub>j(−i)</sub>)² / (2s²)</p><p class="small">The denominator uses 2 fitted coefficients and the full-model error variance s². Predictions are compared at all 21 X values. Lecture 8 uses D &gt; 1 as a flag for review, not a statistical test.</p></div>
+  </div>
+ </details>
+
+ <details class="more">
+  <summary>Other concepts from Lecture 8</summary>
+  <table class="glossary"><thead><tr><th scope="col">Concept</th><th scope="col">Meaning</th><th scope="col">What to look for</th></tr></thead><tbody>
+   <tr><th scope="row">Nonlinearity</th><td>The mean response has a shape that the fitted model misses.</td><td>A curved pattern in residuals versus fitted values or a predictor.</td></tr>
+   <tr><th scope="row">Heteroscedasticity</th><td>The error variance changes across observations.</td><td>A fan or changing spread in the residual plot.</td></tr>
+   <tr><th scope="row">Normality of errors</th><td>The model errors follow a normal distribution.</td><td>Systematic departures from the reference line in a suitable Q–Q plot. Lecture 8 compares studentized residuals with t quantiles.</td></tr>
+  </tbody></table>
+ </details>
+
+ <p class="investigate"><strong>When a point stands out:</strong> flag it, check the original data, and investigate whether the model needs revision. Automatic deletion can discard useful information.</p>
+ <footer class="source"><span>Based on Lecture 8: Regression Diagnostics, slides 3–7, 10–12, and 14–16.</span><span>Illustrative data · One predictor + intercept · Works offline</span></footer>
+</main>
+<script>
+(() => {
+ 'use strict';
+ const $ = id => document.getElementById(id);
+ const NS = 'http://www.w3.org/2000/svg';
+ const colors = {grid:'#edf0ed',line:'#cbd3d1',gray:'#75828a',teal:'#126d70',orange:'#b55225'};
+ const noise = [.5,-.9,.7,-.5,1,-.3,.4,-.8,.6,-.7,-.7,.6,-.8,.4,-.3,1,-.5,.7,-.9,.5];
+ const noiseMean = noise.reduce((a,b)=>a+b,0)/noise.length;
+ const base = noise.map((e,i)=>{const x=2+8*i/19;return {x,y:3+.75*x+e-noiseMean};});
+ const examples = {
+  typical:{x:6,y:7.5,title:'Typical point',text:'The point lies near the center of X and follows the existing trend. The two fitted lines overlap.',lesson:'Low leverage, small residual, and little influence.'},
+  outlier:{x:6,y:17,title:'Outlier near the center',text:'The response is far above the trend at this X. The intercept rises from 3.00 to 3.45, while the slope stays at 0.75 because the point is at the center of X.',lesson:'An outlier can shift the intercept while leaving the slope unchanged.'},
+  leverage:{x:18,y:16.5,title:'High leverage, on trend',text:'The point is far from the other X values and follows their trend. Its Y is high, but appropriate for this X. The two fitted lines overlap.',lesson:'High leverage creates the potential for influence. Here, the fitted coefficients stay the same.'},
+  both:{x:18,y:5,title:'High leverage + outlier',text:'The point is far from the other X values and lies below their trend. It pulls the fitted line toward itself, changing both the intercept and slope.',lesson:'An unusual X combined with an unusual Y at that X can strongly change the fit.'}
+ };
+ const state = {x:6,y:7.5,preset:'typical'};
+ function fit(points){
+  const n=points.length,mx=points.reduce((s,p)=>s+p.x,0)/n,my=points.reduce((s,p)=>s+p.y,0)/n;
+  const sxx=points.reduce((s,p)=>s+(p.x-mx)**2,0);
+  const slope=points.reduce((s,p)=>s+(p.x-mx)*(p.y-my),0)/sxx;
+  const intercept=my-slope*mx;
+  const predict=x=>intercept+slope*x;
+  const mse=points.reduce((s,p)=>s+(p.y-predict(p.x))**2,0)/(n-2);
+  return {n,mx,sxx,slope,intercept,predict,mse};
+ }
+ const without=fit(base);
+ function diagnostics(x,y){
+  const points=[...base,{x,y}],model=fit(points);
+  const h=1/model.n+(x-model.mx)**2/model.sxx;
+  const residual=y-model.predict(x);
+  const studentized=residual/Math.sqrt(without.mse*(1-h));
+  const cook=points.reduce((s,p)=>s+(model.predict(p.x)-without.predict(p.x))**2,0)/(2*model.mse);
+  return {model,h,residual,studentized,cook};
+ }
+ const clean = v => Math.abs(v)<1e-9?0:v;
+ const fmt = (v,d=2) => clean(v).toFixed(d).replace('-', '−');
+ const put = (id,value) => {$(id).textContent=value;};
+ function element(parent,tag,attrs={},text){const node=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>node.setAttribute(k,v));if(text!==undefined)node.textContent=text;parent.appendChild(node);return node;}
+ let coordinates;
+ function draw(d){
+  const svg=$('chart'),width=Math.max(280,svg.clientWidth),height=svg.clientHeight;
+  const left=44,right=18,top=32,bottom=44;
+  const sx=x=>left+x/20*(width-left-right),sy=y=>height-bottom-y/22*(height-top-bottom);
+  coordinates={left,right,top,bottom,width,height};
+  svg.setAttribute('viewBox',`0 0 ${width} ${height}`);
+  svg.replaceChildren();
+  element(svg,'title',{id:'chart-title'},'Effect of one observation on a regression line');
+  element(svg,'desc',{id:'chart-desc'},`Twenty fixed gray observations and the selected orange point at X ${fmt(state.x,1)}, Y ${fmt(state.y,1)}. With the point, intercept ${fmt(d.model.intercept)} and slope ${fmt(d.model.slope)}. Without the point, intercept 3.00 and slope 0.75. Leverage ${fmt(d.h,3)}, studentized residual ${fmt(d.studentized)}, Cook’s distance ${fmt(d.cook,3)}.`);
+  for(const y of [0,5,10,15,20]){
+   element(svg,'line',{x1:left,x2:width-right,y1:sy(y),y2:sy(y),stroke:colors.grid});
+   element(svg,'text',{x:left-10,y:sy(y)+4,'text-anchor':'end'},y);
+  }
+  for(const x of [0,5,10,15,20]){
+   element(svg,'line',{x1:sx(x),x2:sx(x),y1:height-bottom,y2:height-bottom+5,stroke:colors.line});
+   element(svg,'text',{x:sx(x),y:height-bottom+22,'text-anchor':'middle'},x);
+  }
+  element(svg,'line',{x1:left,x2:width-right,y1:height-bottom,y2:height-bottom,stroke:colors.line});
+  element(svg,'text',{x:left,y:17,class:'axis-label'},'Response Y');
+  element(svg,'text',{x:(left+width-right)/2,y:height-5,'text-anchor':'middle',class:'axis-label'},'Predictor X');
+  const defs=element(svg,'defs');
+  element(element(defs,'clipPath',{id:'plot-clip'}),'rect',{x:left,y:top,width:width-left-right,height:height-top-bottom});
+  const plot=element(svg,'g',{'clip-path':'url(#plot-clip)'});
+  element(plot,'line',{x1:sx(0),y1:sy(d.model.predict(0)),x2:sx(20),y2:sy(d.model.predict(20)),stroke:colors.teal,'stroke-width':3});
+  element(plot,'line',{x1:sx(0),y1:sy(without.predict(0)),x2:sx(20),y2:sy(without.predict(20)),stroke:colors.gray,'stroke-width':2.5,'stroke-dasharray':'7 6'});
+  base.forEach(p=>element(plot,'circle',{cx:sx(p.x),cy:sy(p.y),r:4.2,fill:colors.gray,opacity:.67,stroke:'#fff','stroke-width':1}));
+  if(Math.abs(d.residual)>.01){
+   element(plot,'line',{id:'residual-line',x1:sx(state.x),x2:sx(state.x),y1:sy(state.y),y2:sy(d.model.predict(state.x)),stroke:colors.orange,'stroke-width':2,'stroke-dasharray':'3 4'});
+   element(plot,'line',{x1:sx(state.x)-5,x2:sx(state.x)+5,y1:sy(d.model.predict(state.x)),y2:sy(d.model.predict(state.x)),stroke:colors.orange,'stroke-width':2});
+  }
+  const labelRight=state.x<15,labelAbove=state.y<20;
+  element(svg,'text',{x:sx(state.x)+(labelRight?12:-12),y:sy(state.y)+(labelAbove?-13:24),'text-anchor':labelRight?'start':'end',class:'point-label'},'Selected');
+  element(svg,'circle',{id:'selected-point',cx:sx(state.x),cy:sy(state.y),r:9,fill:colors.orange,stroke:'#fff','stroke-width':2});
+  element(svg,'circle',{'data-drag-handle':'true',cx:sx(state.x),cy:sy(state.y),r:18,fill:'transparent',cursor:'grab'});
+ }
+ function customReading(d){
+  const slopeChange=d.model.slope-without.slope,interceptChange=d.model.intercept-without.intercept;
+  const gap=state.y-without.predict(state.x);
+  put('reading-title','Your point');
+  put('reading-text',`Relative to the line fitted to the other observations, Y is ${fmt(Math.abs(gap))} units ${Math.abs(gap)<.005?'away':gap>0?'above':'below'}. Including the point changes the intercept by ${fmt(interceptChange)} and the slope by ${fmt(slopeChange)}.`);
+  put('takeaway',d.cook>1?'Cook’s distance exceeds the lecture’s review guideline of 1. Compare the two lines to see its influence.':Math.abs(gap)<.05?'The point follows the existing trend. Even a distant X can leave the fitted line almost unchanged.':'Move only Y to change the response discrepancy while keeping leverage fixed.');
+ }
+ function update(){
+  const d=diagnostics(state.x,state.y);
+  $('point-x').value=state.x;$('point-y').value=state.y;
+  put('x-value',fmt(state.x,1));put('y-value',fmt(state.y,1));
+  put('h-value',fmt(d.h,3));put('r-value',fmt(d.studentized));put('d-value',fmt(d.cook,3));
+  put('with-equation',`ŷ = ${fmt(d.model.intercept)} ${d.model.slope<0?'−':'+'} ${fmt(Math.abs(d.model.slope))}x`);
+  document.querySelectorAll('[data-preset]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.preset===state.preset)));
+  if(state.preset){const e=examples[state.preset];put('reading-title',e.title);put('reading-text',e.text);put('takeaway',e.lesson);}else customReading(d);
+  put('caption',`The 20 gray observations stay fixed. ${Math.abs(d.residual)<.01?'The two fitted lines overlap.':'The dotted orange segment is the residual to the fit with the point.'} Raw residual = ${fmt(d.residual)}.`);
+  draw(d);
+ }
+ document.querySelectorAll('[data-preset]').forEach(button=>button.addEventListener('click',()=>{const e=examples[button.dataset.preset];Object.assign(state,{x:e.x,y:e.y,preset:button.dataset.preset});update();}));
+ ['x','y'].forEach(axis=>$(`point-${axis}`).addEventListener('input',event=>{state[axis]=Number(event.target.value);state.preset=null;update();}));
+ let dragging=false;
+ function move(event){
+  const rect=$('chart').getBoundingClientRect(),c=coordinates;
+  const px=(event.clientX-rect.left)*c.width/rect.width,py=(event.clientY-rect.top)*c.height/rect.height;
+  state.x=Math.round(Math.max(0,Math.min(20,(px-c.left)/(c.width-c.left-c.right)*20))*10)/10;
+  state.y=Math.round(Math.max(0,Math.min(22,(c.height-c.bottom-py)/(c.height-c.top-c.bottom)*22))*10)/10;
+  state.preset=null;update();
+ }
+ $('chart').addEventListener('pointerdown',event=>{if(event.button!==0||!(event.target.id==='selected-point'||event.target.hasAttribute('data-drag-handle')))return;event.preventDefault();dragging=true;$('chart').classList.add('dragging');$('chart').setPointerCapture(event.pointerId);});
+ $('chart').addEventListener('pointermove',event=>{if(dragging)move(event);});
+ function endDrag(){dragging=false;$('chart').classList.remove('dragging');}
+ $('chart').addEventListener('pointerup',endDrag);$('chart').addEventListener('pointercancel',endDrag);$('chart').addEventListener('lostpointercapture',endDrag);
+ let pendingResize;
+ window.addEventListener('resize',()=>{cancelAnimationFrame(pendingResize);pendingResize=requestAnimationFrame(update);});
+ update();
+})();
+</script>
+</body>
+</html>
