@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LASSO vs. Ridge Regression | Interactive Demo</title>
+<style>
+  :root { --ink:#14263a; --muted:#536478; --line:#dce4ec; --bg:#f4f7fa; --ridge:#1766a6; --lasso:#b44b29; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+  main { max-width:1160px; margin:auto; padding:28px 24px 40px; }
+  h1 { font-size:clamp(26px,3vw,38px); line-height:1.18; letter-spacing:-.035em; margin:0 0 7px; }
+  h2 { margin:0; font-size:24px; letter-spacing:-.02em; }
+  h3 { font-size:15px; margin:0 0 6px; }
+  p { margin:0; }
+  .subtitle { color:var(--muted); max-width:850px; }
+  .control { background:white; border:1px solid var(--line); border-radius:12px; margin:20px 0 18px; padding:16px 20px; }
+  .control-head { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+  output { font-size:29px; font-weight:750; font-variant-numeric:tabular-nums; }
+  .slider { display:block; width:100%; margin:7px 0 0; accent-color:#284b70; cursor:pointer; }
+  .scale { display:flex; justify-content:space-between; color:var(--muted); font-size:12px; }
+  .presets { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  button { font:inherit; font-size:13px; color:var(--ink); border:1px solid #c9d6e3; border-radius:6px; background:#fff; padding:5px 11px; cursor:pointer; }
+  button:hover { background:#edf3f8; } button:focus-visible,input:focus-visible { outline:3px solid #709ac3; outline-offset:3px; }
+  .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+  .panel { background:#fff; border:1px solid var(--line); border-top:4px solid var(--accent); border-radius:12px; padding:16px 18px 13px; min-width:0; }
+  .ridge { --accent:var(--ridge); --tint:#eaf3fb; } .lasso { --accent:var(--lasso); --tint:#fbefe9; }
+  .eyebrow { font-size:11px; letter-spacing:.1em; font-weight:750; color:var(--accent); text-transform:uppercase; }
+  .formula { background:var(--tint); border-radius:7px; padding:10px 12px; margin:10px 0; font:17px/1.5 Georgia,serif; white-space:normal; }
+  .formula .penalty { color:var(--accent); font-weight:700; }
+  .values { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 0 10px; }
+  .value { border:1px solid var(--line); border-radius:8px; padding:8px 10px; }
+  .value span { display:block; color:var(--muted); font-size:12px; }
+  .value strong { color:var(--accent); font-size:25px; font-weight:720; font-variant-numeric:tabular-nums; }
+  .value strong.zero { color:var(--ink); }
+  .plot { display:block; width:100%; height:auto; }
+  .legend { display:flex; flex-wrap:wrap; gap:5px 13px; font-size:11px; color:var(--muted); align-items:center; justify-content:center; margin:0 0 12px; }
+  .legend span { display:inline-flex; gap:5px; align-items:center; }
+  .dot { width:10px;height:10px;border-radius:50%;display:inline-block; background:var(--accent); }
+  .dot.open { border:1.7px solid #263647; background:white; }
+  .swatch { width:16px; height:0; border-top:2px solid var(--accent); display:inline-block; }
+  .swatch.gray { border-color:#98a5b3; }
+  .swatch.dash { border-top-style:dashed; }
+  .paths { border-top:1px solid var(--line); padding-top:12px; }
+  .takeaway { margin-top:9px; min-height:47px; font-size:14px; color:var(--muted); }
+  .bottom { border:1px solid var(--line); background:white; border-radius:12px; padding:16px 20px; margin-top:16px; }
+  .bottom p { margin-top:5px; font-size:14px; color:var(--muted); }
+  details { margin-top:12px; color:var(--muted); font-size:13px; }
+  summary { cursor:pointer; font-weight:600; color:var(--ink); }
+  details p { margin:7px 0; }
+  @media(max-width:740px) { main { padding:18px 12px; } .grid { grid-template-columns:1fr; } .panel { padding:14px; } .control { padding:12px 15px; } .takeaway { min-height:0; } }
+  @media print { body { background:white; } main { padding:0; } .presets { display:none; } .panel { break-inside:avoid; } }
+
+  .tabs { display:flex; gap:8px; border-bottom:1px solid var(--line); margin:20px 0 18px; }
+  .tab { font-size:15px; font-weight:650; border:0; background:transparent; border-radius:7px 7px 0 0; padding:10px 15px; color:var(--muted); border-bottom:3px solid transparent; }
+  .tab[aria-selected="true"] { color:var(--ink); background:white; border-bottom-color:#284b70; }
+  [hidden] { display:none !important; }
+  .concept { padding:18px 20px; margin:0 0 16px; background:white; border:1px solid var(--line); border-radius:12px; }
+  .concept h2 { font-size:21px; margin-bottom:5px; }
+  .concept > p { color:var(--muted); font-size:14px; }
+  .concept-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:14px 0; }
+  .concept-card { border:1px solid var(--line); border-radius:9px; padding:12px; min-width:0; }
+  .concept-card h3 { font-size:16px; }
+  .concept-card p { font-size:13px; color:var(--muted); margin:6px 0 0; }
+  .mini-formula { font:16px/1.4 Georgia,serif; color:var(--ink); min-height:44px; }
+  .mathline { font:16px/1.5 Georgia,serif; }
+  .contact { border-top:1px solid var(--line); padding-top:12px; font-size:14px; color:var(--muted); }
+  .contact strong { color:var(--ink); }
+  .view-controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:8px 0; }
+  .view-controls span { font-size:13px; color:var(--muted); margin-right:4px; }
+  button[aria-pressed="true"] { background:#e7eff7; border-color:#7693b2; font-weight:650; }
+  .section-head { margin:5px 0 14px; }
+  .section-head p { color:var(--muted); font-size:14px; margin-top:5px; }
+  .practical-controls { display:flex; align-items:flex-end; flex-wrap:wrap; gap:12px 18px; }
+  .practical-controls label { display:block; font-size:13px; font-weight:650; margin-bottom:5px; }
+  select { font:inherit; font-size:14px; padding:7px 9px; border:1px solid #c9d6e3; border-radius:6px; color:var(--ink); background:white; }
+  .practical-controls button { padding:8px 12px; }
+  .muted { color:var(--muted); font-size:13px; }
+  .practical-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:12px 0; }
+  .plain-panel { background:white; border:1px solid var(--line); border-radius:12px; padding:16px 18px; min-width:0; }
+  .plain-panel h2 { font-size:19px; margin-bottom:8px; }
+  .plain-panel h3 { font-size:16px; }
+  .scroll-x { overflow-x:auto; }
+  .results { width:100%; border-collapse:collapse; font-size:14px; font-variant-numeric:tabular-nums; }
+  .results th, .results td { padding:10px 9px; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap; }
+  .results th:first-child,.results td:first-child { text-align:left; }
+  .results th { font-size:12px; color:var(--muted); font-weight:650; }
+  .results tbody tr:last-child td { border-bottom:0; }
+  .method-ols { color:#566575; } .method-ridge { color:var(--ridge); } .method-lasso { color:var(--lasso); }
+  .wide-plot { min-width:690px; }
+  .insight { margin:12px 0 0; border-top:1px solid var(--line); padding-top:12px; color:var(--muted); font-size:14px; }
+  .setup { display:flex; flex-wrap:wrap; gap:7px 18px; margin:12px 0 2px; color:var(--muted); font-size:13px; }
+  .setup strong { color:var(--ink); }
+  @media(max-width:740px) { .concept-grid,.practical-grid { grid-template-columns:1fr; } .concept-card .plot { max-width:330px; margin:auto; } .tab { padding:8px 11px; font-size:14px; } .plain-panel,.concept { padding:13px; } }
+
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>LASSO vs. ridge regression</h1>
+    <p class="subtitle">Same least-squares problem. Different penalties. Move the slider to see how the estimated coefficients change.</p>
+  </header>
+  <nav class="tabs" role="tablist" aria-label="Demo sections">
+    <button class="tab" id="tabGeometry" role="tab" aria-controls="geometryTab" aria-selected="true">1. Geometry &amp; intuition</button>
+    <button class="tab" id="tabPractice" role="tab" aria-controls="practiceTab" aria-selected="false" tabindex="-1">2. Practical example</button>
+  </nav>
+  <section id="geometryTab" role="tabpanel" aria-labelledby="tabGeometry">
+  <section class="concept" aria-label="Understanding objective terms">
+    <h2>Where do the shapes come from?</h2>
+    <p>Each point in the (&beta;<sub>1</sub>, &beta;<sub>2</sub>) plane is a different regression model. The height of a function at that point is its loss or penalty. A contour connects points with the same height, like a contour line on a topographic map.</p>
+    <div class="concept-grid">
+      <article class="concept-card">
+        <h3>1. Data-fitting term: ellipses</h3>
+        <div class="mini-formula">L(&beta;) = (1/2n) &sum;<sub>i</sub>(y<sub>i</sub> &minus; x<sub>i</sub><sup>T</sup>&beta;)<sup>2</sup></div>
+        <svg id="miniLoss" class="plot" viewBox="0 0 270 225" role="img" aria-label="Elliptical loss contours around OLS"></svg>
+        <p><strong>Same ellipse = same training loss.</strong> OLS is at the center, where the loss is smallest. Moving away raises the squared prediction errors. Correlation between predictors tilts the ellipses.</p>
+      </article>
+      <article class="concept-card">
+        <h3 class="method-ridge">2. Ridge penalty: circles</h3>
+        <div class="mini-formula">&beta;<sub>1</sub><sup>2</sup> + &beta;<sub>2</sub><sup>2</sup> = 4 &nbsp;&hArr;&nbsp; ||&beta;||<sub>2</sub> = 2</div>
+        <svg id="miniRidge" class="plot" viewBox="0 0 270 225" role="img" aria-label="Circular equal ridge penalty contour"></svg>
+        <p><strong>Same circle = same squared Euclidean distance from zero.</strong> (2, 0) and (&radic;2, &radic;2) both have squared norm 4. Large coefficients become increasingly expensive.</p>
+      </article>
+      <article class="concept-card">
+        <h3 class="method-lasso">3. LASSO penalty: diamonds</h3>
+        <div class="mini-formula">|&beta;<sub>1</sub>| + |&beta;<sub>2</sub>| = 2</div>
+        <svg id="miniLasso" class="plot" viewBox="0 0 270 225" role="img" aria-label="Diamond equal LASSO penalty contour"></svg>
+        <p><strong>Same diamond = same sum of absolute magnitudes.</strong> (2, 0) and (1, 1) both cost 2. In each quadrant, the boundary is a straight line; the axes form sharp corners.</p>
+      </article>
+    </div>
+    <div class="contact"><strong>Putting the terms together:</strong> the loss pulls the estimate toward OLS; the penalty pulls it toward the origin. Multiplying a penalty by &lambda; changes its weight, not the shape of its level sets. The penalized optimum is also the lowest-loss point inside a corresponding penalty budget (the shaded region below). The budget depends on the chosen &lambda; and differs between methods. A diamond corner can force one coefficient to zero, while a smooth circle usually cannot.</div>
+  </section>
+  <section class="control" aria-label="Regularization controls">
+    <div class="control-head"><label for="lambda"><strong>Regularization strength, &lambda;</strong></label><output id="lambdaValue" for="lambda">1.50</output></div>
+    <input class="slider" id="lambda" type="range" min="0" max="3" step="0.01" value="1.50">
+    <div class="scale"><span>0 &middot; ordinary least squares</span><span>3 &middot; stronger penalty</span></div>
+    <div class="presets"><button data-lambda="0">OLS</button><button data-lambda="0.65">Moderate</button><button data-lambda="1.50">One zero coefficient</button><button data-lambda="3">Strong penalty</button></div>
+  </section>
+  <div class="view-controls" aria-label="Geometry view"><span>Show:</span><button id="budgetMode" aria-pressed="true">Loss + penalty budget</button><button id="objectiveMode" aria-pressed="false">Contours of the summed objective</button></div>
+  <p class="muted" id="modeExplain" style="margin:0 0 12px">The colored dashed ellipse is the smallest loss contour that touches the penalty budget. That contact point minimizes the penalized objective.</p>
+  <div class="grid">
+    <section class="panel ridge" aria-labelledby="ridgeTitle">
+      <div class="eyebrow">L2 penalty</div><h2 id="ridgeTitle">Ridge regression</h2>
+      <div class="formula">min<sub>&beta;</sub> &nbsp; L(&beta;) + <span class="penalty">(&lambda;/2)(&beta;<sub>1</sub><sup>2</sup> + &beta;<sub>2</sub><sup>2</sup>)</span></div>
+      <div class="values"><div class="value"><span>Coefficient &beta;<sub>1</sub></span><strong id="ridge1"></strong></div><div class="value"><span>Coefficient &beta;<sub>2</sub></span><strong id="ridge2"></strong></div></div>
+      <h3 id="ridgeGeoHeading">Geometry: circular constraint</h3>
+      <svg class="plot" id="ridgeGeometry" viewBox="0 0 430 332" role="img" aria-label="Ridge least squares contours and circular constraint"></svg>
+      <div class="legend"><span><i class="swatch gray"></i>Loss contours</span><span><i class="swatch" ></i><span id="ridgeLegend">Penalty budget</span></span><span><i class="dot open"></i>OLS</span><span><i class="dot"></i>Ridge estimate</span></div>
+      <div class="paths"><h3>Coefficient paths</h3><svg class="plot" id="ridgePath" viewBox="0 0 430 156" role="img" aria-label="Ridge coefficients versus lambda"></svg><div class="legend"><span><i class="swatch"></i>&beta;<sub>1</sub></span><span><i class="swatch dash"></i>&beta;<sub>2</sub></span></div></div>
+      <p class="takeaway" id="ridgeNote" aria-live="polite"></p>
+    </section>
+    <section class="panel lasso" aria-labelledby="lassoTitle">
+      <div class="eyebrow">L1 penalty</div><h2 id="lassoTitle">LASSO regression</h2>
+      <div class="formula">min<sub>&beta;</sub> &nbsp; L(&beta;) + <span class="penalty">&lambda;(|&beta;<sub>1</sub>| + |&beta;<sub>2</sub>|)</span></div>
+      <div class="values"><div class="value"><span>Coefficient &beta;<sub>1</sub></span><strong id="lasso1"></strong></div><div class="value"><span>Coefficient &beta;<sub>2</sub></span><strong id="lasso2"></strong></div></div>
+      <h3 id="lassoGeoHeading">Geometry: diamond-shaped constraint</h3>
+      <svg class="plot" id="lassoGeometry" viewBox="0 0 430 332" role="img" aria-label="LASSO least squares contours and diamond-shaped constraint"></svg>
+      <div class="legend"><span><i class="swatch gray"></i>Loss contours</span><span><i class="swatch"></i><span id="lassoLegend">Penalty budget</span></span><span><i class="dot open"></i>OLS</span><span><i class="dot"></i>LASSO estimate</span></div>
+      <div class="paths"><h3>Coefficient paths</h3><svg class="plot" id="lassoPath" viewBox="0 0 430 156" role="img" aria-label="LASSO coefficients versus lambda"></svg><div class="legend"><span><i class="swatch"></i>&beta;<sub>1</sub></span><span><i class="swatch dash"></i>&beta;<sub>2</sub></span></div></div>
+      <p class="takeaway" id="lassoNote" aria-live="polite"></p>
+    </section>
+  </div>
+  <section class="bottom">
+    <h3>Why does LASSO select variables?</h3>
+    <p>Each gray ellipse is a level set of the least-squares loss. The fitted point minimizes loss within the colored feasible region. The diamond has corners on the coordinate axes, so the first contact can occur at a coefficient of exactly zero. The circle is smooth, so ridge generally retains all predictors while shrinking the coefficient vector.</p>
+    <p>Both methods trade a higher training error for regularization, which can reduce prediction variance. Choose &lambda; using validation data or cross-validation, and standardize predictors before fitting.</p>
+    <details><summary>Model and scaling used in this demo</summary><p>Two centered, standardized predictors have correlation &rho; = 0.4, with OLS coefficients (2.0, 0.9). The intercept is unpenalized. We use L(&beta;) = RSS(&beta;)/(2n), up to an additive constant. The corresponding quadratic loss is ½[(β₁−2)² + 2ρ(β₁−2)(β₂−0.9) + (β₂−0.9)²].</p><p>All estimates are computed from this same fixed quadratic problem. The ridge circle has radius ||&beta;̂<sub>ridge</sub>||<sub>2</sub>, and the LASSO diamond has radius ||&beta;̂<sub>lasso</sub>||<sub>1</sub>, giving the constrained equivalent of each penalized solution. Equal values of &lambda; need not imply equal effective shrinkage between penalties. This example does not simulate test error.</p></details>
+  </section>
+
+  </section>
+  <section id="practiceTab" role="tabpanel" aria-labelledby="tabPractice" hidden>
+    <div class="section-head"><h2>Predicting a continuous outcome from 20 measurements</h2><p>Imagine predicting a health score from 20 correlated measurements. We simulate a dataset so we know the true coefficients, and compare prediction and variable selection on data the models have never seen.</p></div>
+    <section class="control" aria-label="Simulation controls" style="margin-top:0">
+      <div class="practical-controls">
+        <div><label for="scenario">True signal</label><select id="scenario"><option value="sparse">Sparse: only 3 relevant predictors</option><option value="dense">Dense: all 20 predictors contribute</option></select></div>
+        <div><label for="sampleSize">Training sample size</label><select id="sampleSize"><option value="35">35 (small)</option><option value="60">60 (moderate)</option><option value="200">200 (large)</option></select></div>
+        <button id="newData">Generate new data</button>
+      </div>
+      <div class="setup"><span><strong>20</strong> predictors</span><span><strong id="trainCount">35</strong> training observations</span><span><strong>120</strong> validation observations</span><span><strong>1,500</strong> test observations</span><span>Noise SD: <strong>2</strong></span><span>Within-block correlation: <strong>0.55</strong></span><span>Simulation seed: <strong id="seedValue"></strong></span></div>
+    </section>
+    <section class="plain-panel">
+      <h2>Compare out-of-sample prediction</h2>
+      <p class="muted">We fit all three models on the same training data. For ridge and LASSO, choose &lambda; separately by minimizing validation RMSE. Evaluate the selected models on an independent test set. Lower RMSE is better.</p>
+      <div class="scroll-x"><table class="results" aria-label="Model comparison"><thead><tr><th>Model</th><th>Selected &lambda;</th><th>Train RMSE</th><th>Validation RMSE</th><th>Test RMSE &darr;</th><th>Nonzero &beta;</th></tr></thead><tbody id="resultsBody"></tbody></table></div>
+      <p id="resultInsight" class="insight" aria-live="polite"></p>
+    </section>
+    <div class="practical-grid">
+      <section class="plain-panel" style="grid-column:1/-1"><h2>Estimated coefficients vs. the truth</h2><p class="muted">Each group represents one predictor. Gray dots mark true coefficients; bars show estimated coefficients. A bar at zero means the fitted predictor has no effect.</p><div class="scroll-x"><svg class="plot wide-plot" id="coefficientComparison" viewBox="0 0 1000 310" role="img" aria-label="True and estimated regression coefficients by predictor"></svg></div><div class="legend"><span><i class="dot" style="background:#243448"></i>Truth</span><span><i class="swatch" style="border-color:#8493a4"></i>OLS</span><span><i class="swatch" style="border-color:#1766a6"></i>Ridge</span><span><i class="swatch" style="border-color:#b44b29"></i>LASSO</span></div></section>
+      <section class="plain-panel"><h2>How &lambda; is chosen</h2><p class="muted">Validation error over a grid of penalty strengths. The colored dots show each method's selected &lambda;.</p><svg class="plot" id="validationPlot" viewBox="0 0 470 255" role="img" aria-label="Validation RMSE versus lambda"></svg><div class="legend"><span><i class="swatch" style="border-color:#8493a4;border-top-style:dashed"></i>OLS (λ = 0)</span><span><i class="swatch" style="border-color:#1766a6"></i>Ridge</span><span><i class="swatch" style="border-color:#b44b29"></i>LASSO</span></div></section>
+      <section class="plain-panel"><h2>What to look for</h2><p class="muted" style="margin-bottom:10px"><strong>OLS:</strong> minimizes training error. With limited data and correlated predictors, the estimated coefficients can be unstable and test error can be high.</p><p class="muted" style="margin-bottom:10px"><strong>Ridge:</strong> shrinks coefficients and can distribute the signal among correlated predictors. It is often useful when many predictors have small effects.</p><p class="muted" style="margin-bottom:10px"><strong>LASSO:</strong> shrinks and can set coefficients exactly to zero. It is often useful when a sparse predictive model is plausible. Correlated predictors can make selection unstable.</p><p class="muted"><strong>Try:</strong> change the signal to dense, increase the sample size, or generate a new dataset. No method is guaranteed to win for every realization.</p></section>
+    </div>
+    <section class="bottom"><h3>From this demo to real data</h3><p>Standardize predictors using training-set means and standard deviations only, fit the intercept without a penalty, and tune &lambda; by cross-validation. Keep a final test set untouched until model selection is complete. LASSO's selected variables are predictive associations, not necessarily causal effects or stable discoveries.</p><details><summary>Simulation and fitting details</summary><p>All features have population variance 1. Independent blocks of five jointly Gaussian features have equicorrelation 0.55. The response is y = 1 + X&beta; + &epsilon;, with independent Gaussian noise of SD 2. The sparse setting has coefficients (2, −1.5, 1, 0, …, 0); the dense setting has twenty nonzero, alternating-sign coefficients of magnitudes 0.45–0.85. Training, validation and test observations are generated independently from the same model. The seed makes each simulation reproducible.</p><p>OLS and ridge are solved by pivoted elimination; LASSO uses coordinate descent with soft thresholding. Objectives use RSS/(2n) + (&lambda;/2)||&beta;||<sub>2</sub><sup>2</sup> for ridge and RSS/(2n) + &lambda;||&beta;||<sub>1</sub> for LASSO on standardized predictors. A common grid of &lambda; = 0 and 49 positive log-spaced values from 10<sup>−4</sup> to 10 is evaluated separately for each penalty. Coefficients in the plot are converted back to the original feature scale.</p></details></section>
+  </section>
+
+</main>
+<script>
+'use strict';
+// Quadratic least-squares loss: G = X'X/n, b = OLS, z = X'y/n = G b.
+const rho = 0.4, b = [2, 0.9], z = [b[0] + rho*b[1], rho*b[0] + b[1]];
+const MAX = 3, switchAt = (1+rho)*b[1];
+const colors = {ridge:'#1766a6', lasso:'#b44b29'};
+let geometryMode='budget';
+function ridge(l) {
+  const a = 1+l, det = a*a-rho*rho;
+  return [(a*z[0]-rho*z[1])/det, (a*z[1]-rho*z[0])/det];
+}
+// Exact LASSO solution for this particular two-feature example, from the KKT conditions.
+function lasso(l) {
+  if (l < switchAt) return [b[0]-l/(1+rho),b[1]-l/(1+rho)];
+  return [Math.max(0,z[0]-l),0];
+}
+function loss(v) { const x=v[0]-b[0], y=v[1]-b[1]; return 0.5*(x*x+2*rho*x*y+y*y); }
+const fixed = (x,d=2) => (Math.abs(x)<1e-12 ? 0 : x).toFixed(d);
+const esc = s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;');
+function line(x1,y1,x2,y2,stroke='#dce4ec',w=1,extra='') {return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${w}" ${extra}/>`;}
+function txt(x,y,s,extra='') {return `<text x="${x}" y="${y}" fill="#536478" ${extra.includes('font-size=')?'':'font-size="11"'} ${extra}>${esc(s)}</text>`;}
+function dot(x,y,r,fill,stroke='white',w=1.5) {return `<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${w}"/>`;}
+function path(points,stroke,w=1.5,fill='none',extra='') {return `<path d="${points.map(([x,y],i)=>`${i?'L':'M'}${x.toFixed(2)},${y.toFixed(2)}`).join(' ')}" fill="${fill}" stroke="${stroke}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round" ${extra}/>`;}
+function geometry(kind,v,l) {
+  const id=kind+'Geometry', svg=document.getElementById(id), c=colors[kind];
+  // Square plot region and equal units on both axes preserve the actual constraint shape.
+  const left=69,top=8,side=288,range=3.4,scale=side/(2*range), X=x=>left+side/2+x*scale,Y=y=>top+side/2-y*scale;
+  let s=`<defs><clipPath id="${id}Clip"><rect x="${left}" y="${top}" width="${side}" height="${side}"/></clipPath></defs>`;
+  s+=`<rect x="${left}" y="${top}" width="${side}" height="${side}" fill="#fafcfe" stroke="#e0e6ee"/>`;
+  for(let t=-3;t<=3;t++) {
+    s+=line(X(t),top,X(t),top+side,t===0?'#9aa8b8':'#e6edf3',t===0?1.3:1);
+    s+=line(left,Y(t),left+side,Y(t),t===0?'#9aa8b8':'#e6edf3',t===0?1.3:1);
+    s+=txt(X(t),top+side+16,t, 'text-anchor="middle"');
+    s+=txt(left-8,Y(t)+4,t,'text-anchor="end"');
+  }
+  s+=txt(left+side/2,top+side+32,'β₁','text-anchor="middle" font-size="14" font-weight="600"');
+  s+=txt(left-30,top+side/2,'β₂',`text-anchor="middle" font-size="14" font-weight="600" transform="rotate(-90 ${left-30} ${top+side/2})"`);
+  s+=`<g clip-path="url(#${id}Clip)">`;
+  // Draw the feasible region corresponding to the current penalized optimum.
+  const radius=kind==='ridge'?Math.hypot(...v):Math.abs(v[0])+Math.abs(v[1]);
+  if(geometryMode==='budget' && radius>1e-10) {
+    if(kind==='ridge') s+=`<circle cx="${X(0)}" cy="${Y(0)}" r="${radius*scale}" fill="${c}" fill-opacity=".10" stroke="${c}" stroke-width="2.2"/>`;
+    else s+=path([[radius,0],[0,radius],[-radius,0],[0,-radius],[radius,0]].map(([x,y])=>[X(x),Y(y)]),c,2.2,c,'fill-opacity=".10"');
+  }
+  // Eigenvectors of G are (1,1)/sqrt(2) and (1,-1)/sqrt(2).
+  function ellipse(q) {
+    const points=[];
+    for(let i=0;i<=160;i++) { const t=2*Math.PI*i/160, u=Math.sqrt(2*q/(1+rho))*Math.cos(t),w=Math.sqrt(2*q/(1-rho))*Math.sin(t); points.push([X(b[0]+(u+w)/Math.SQRT2),Y(b[1]+(u-w)/Math.SQRT2)]); }
+    return points;
+  }
+  for(const q of [0.045,0.16,0.4,0.8,1.4,2.4,4,6]) s+=path(ellipse(q),'#a3afbd',1.05,'none','opacity=".77"');
+  const q=loss(v);
+  if(geometryMode==='budget') {
+    if(q>1e-10) s+=path(ellipse(q),c,2.0,'none','stroke-dasharray="5 3"');
+  } else {
+    // Direct objective level sets, centered at the minimizer. Along a ray,
+    // convexity ensures the objective cannot decrease away from that point.
+    const objective=w=>loss(w)+l*(kind==='ridge'?.5*(w[0]**2+w[1]**2):Math.abs(w[0])+Math.abs(w[1]));
+    const base=objective(v);
+    for(const level of [.08,.3,.75,1.5,3]) {
+      let pts=[];
+      for(let i=0;i<=240;i++) {
+        let t=2*Math.PI*i/240, dx=Math.cos(t),dy=Math.sin(t),lo=0,hi=12;
+        for(let j=0;j<25;j++) {let m=(lo+hi)/2;if(objective([v[0]+m*dx,v[1]+m*dy])-base<level)lo=m;else hi=m;}
+        let d=(lo+hi)/2;pts.push([X(v[0]+d*dx),Y(v[1]+d*dy)]);
+      }
+      s+=path(pts,c,1.8,'none','opacity=".82"');
+    }
+  }
+  s+=dot(X(b[0]),Y(b[1]),5.8,'white','#263647',1.7);
+  s+=dot(X(v[0]),Y(v[1]),4.8,c,'white',1.4);
+  s+='</g>';
+  svg.innerHTML=s;
+}
+function coefficientPath(kind,l,v) {
+  const svg=document.getElementById(kind+'Path'), c=colors[kind], fit=kind==='ridge'?ridge:lasso;
+  const left=42, right=410, top=8, bottom=120, maxY=2.2;
+  const X=t=>left+(right-left)*t/MAX,Y=t=>bottom-(bottom-top)*t/maxY;
+  let s=`<rect x="${left}" y="${top}" width="${right-left}" height="${bottom-top}" fill="#fafcfe" stroke="#e0e6ee"/>`;
+  for(const t of [0,.5,1,1.5,2]){s+=line(left,Y(t),right,Y(t),t===0?'#8495a7':'#e2e9f0',t===0?1.3:1);s+=txt(left-7,Y(t)+4,t,'text-anchor="end"');}
+  for(const t of [0,1,2,3]){s+=line(X(t),top,X(t),bottom,'#e2e9f0');s+=txt(X(t),bottom+16,t,'text-anchor="middle"');}
+  s+=txt((left+right)/2,152,'λ','text-anchor="middle" font-size="13"');
+  const ls=Array.from({length:301},(_,i)=>i*MAX/300);
+  for(let j=0;j<2;j++)s+=path(ls.map(t=>[X(t),Y(fit(t)[j])]),c,2.5,'none',j?'stroke-dasharray="6 4"':'');
+  s+=line(X(l),top,X(l),bottom,'#45566a',1.2,'stroke-dasharray="3 3"');
+  s+=dot(X(l),Y(v[0]),4.2,c);s+=dot(X(l),Y(v[1]),4.2,c);
+  svg.innerHTML=s;
+}
+function update() {
+  const l=Number(document.getElementById('lambda').value);
+  document.getElementById('lambdaValue').textContent=fixed(l);
+  const r=ridge(l), a=lasso(l);
+  for(const [kind,v] of [['ridge',r],['lasso',a]]) {
+    v.forEach((x,i)=>{const e=document.getElementById(kind+(i+1));e.textContent=fixed(x,3);e.classList.toggle('zero',Math.abs(x)<1e-12);});
+    geometry(kind,v,l);coefficientPath(kind,l,v);
+  }
+  document.getElementById('ridgeNote').textContent=l===0?'At λ = 0, both methods recover ordinary least squares.':'Both coefficients remain nonzero in this example. Ridge shrinks the overall coefficient norm continuously.';
+  document.getElementById('lassoNote').textContent=l===0?'At λ = 0, both methods recover ordinary least squares.':a[0]===0?'Both coefficients are exactly zero. The fitted model retains only the intercept.':a[1]===0?'β₂ is exactly zero. The L1 penalty permits the optimum to lie on a coordinate axis, leaving only predictor 1.':'Both coefficients are nonzero. Increase λ to 1.26 to see β₂ become exactly zero.';
+}
+document.getElementById('lambda').addEventListener('input',update);
+document.querySelectorAll('button[data-lambda]').forEach(button=>button.addEventListener('click',()=>{document.getElementById('lambda').value=button.dataset.lambda;update();}));
+update();
+
+// The three terms visualized independently, with equal axis scales.
+function miniContours() {
+  for(const kind of ['Loss','Ridge','Lasso']) {
+    const svg=document.getElementById('mini'+kind), left=45,top=6,side=180, range=3.4;
+    const X=x=>left+side/2+x*side/(2*range),Y=y=>top+side/2-y*side/(2*range);
+    const c=kind==='Ridge'?colors.ridge:kind==='Lasso'?colors.lasso:'#63768a';
+    let out=`<defs><clipPath id="miniClip${kind}"><rect x="${left}" y="${top}" width="${side}" height="${side}"/></clipPath></defs><rect x="${left}" y="${top}" width="${side}" height="${side}" fill="#fafcfe" stroke="#e0e6ee"/>`;
+    for(let i=-3;i<=3;i++) {out+=line(X(i),top,X(i),top+side,i===0?'#9aa8b8':'#e6edf3');out+=line(left,Y(i),left+side,Y(i),i===0?'#9aa8b8':'#e6edf3');out+=txt(X(i),top+side+15,i,'text-anchor="middle"');out+=txt(left-6,Y(i)+4,i,'text-anchor="end"');}
+    out+=txt(left+side/2,220,'β₁','text-anchor="middle" font-size="13"');out+=txt(17,top+side/2,'β₂','text-anchor="middle" font-size="13"');
+    out+=`<g clip-path="url(#miniClip${kind})">`;
+    if(kind==='Loss') {
+      // A translated, positive-definite quadratic centered on an OLS point.
+      const center=b;
+      for(const q of [.08,.27,.65,1.25,2.2]) {let pts=[];for(let i=0;i<=160;i++){let t=2*Math.PI*i/160,u=Math.sqrt(2*q/(1+rho))*Math.cos(t),w=Math.sqrt(2*q/(1-rho))*Math.sin(t);pts.push([X(center[0]+(u+w)/Math.SQRT2),Y(center[1]+(u-w)/Math.SQRT2)]);}out+=path(pts,c,1.5);}
+      out+=dot(X(center[0]),Y(center[1]),4.5,'#243448');out+=txt(X(center[0])+7,Y(center[1])-7,'OLS','font-weight="700"');
+    } else {
+      for(const r of [.7,1.3,2,2.5]) {
+        const strong=r===2;
+        if(kind==='Ridge')out+=`<circle cx="${X(0)}" cy="${Y(0)}" r="${r*side/(2*range)}" fill="none" stroke="${c}" stroke-width="${strong?2.6:1.15}" opacity="${strong?1:.45}"/>`;
+        else out+=path([[r,0],[0,r],[-r,0],[0,-r],[r,0]].map(([x,y])=>[X(x),Y(y)]),c,strong?2.6:1.15,'none',`opacity="${strong?1:.45}"`);
+      }
+      const v=kind==='Ridge'?Math.SQRT2:1;
+      out+=dot(X(2),Y(0),4,c);out+=dot(X(v),Y(v),4,c);out+=dot(X(0),Y(0),3,'#243448');
+      out+=txt(X(2)-3,Y(0)+15,'(2, 0)','text-anchor="end" font-size="10"');
+      out+=txt(X(v)-5,Y(v)-8,kind==='Ridge'?'(√2, √2)':'(1, 1)','text-anchor="end" font-size="10"');
+    }
+    svg.innerHTML=out+'</g>';
+  }
+}
+function setGeometryMode(mode) {
+  geometryMode=mode;
+  const budget=mode==='budget';
+  document.getElementById('budgetMode').setAttribute('aria-pressed',budget);
+  document.getElementById('objectiveMode').setAttribute('aria-pressed',!budget);
+  document.getElementById('ridgeGeoHeading').textContent=budget?'Geometry: circular constraint':'Geometry: smooth objective contours';
+  document.getElementById('lassoGeoHeading').textContent=budget?'Geometry: diamond-shaped constraint':'Geometry: objective contours with kinks';
+  for(const kind of ['ridge','lasso'])document.getElementById(kind+'Legend').textContent=budget?'Penalty budget':'Total objective contours';
+  document.getElementById('modeExplain').textContent=budget?'The colored dashed ellipse is the smallest loss contour that touches the penalty budget. That contact point minimizes the penalized objective.':'The colored curves are equal values of the full objective: loss + weighted penalty. The colored dot is its minimum. For λ > 0, ridge is smooth, whereas LASSO has kinks along the axes.';
+  update();
+}
+document.getElementById('budgetMode').addEventListener('click',()=>setGeometryMode('budget'));
+document.getElementById('objectiveMode').addEventListener('click',()=>setGeometryMode('objective'));
+miniContours();
+
+// Practical example: independent training, validation and test sets.
+const P=20, NVAL=120, NTEST=1500, CORR=.55, NOISE=2;
+let seed=42;
+const methodColors={OLS:'#8493a4',Ridge:colors.ridge,LASSO:colors.lasso};
+function rngFromSeed(seed) {
+  let state=seed>>>0, spare=null;
+  function uniform(){state=(state+0x6D2B79F5)>>>0;let t=state;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;}
+  return function normal(){if(spare!==null){let q=spare;spare=null;return q;}let u=Math.max(uniform(),1e-15),v=uniform(),r=Math.sqrt(-2*Math.log(u));spare=r*Math.sin(2*Math.PI*v);return r*Math.cos(2*Math.PI*v);};
+}
+function simulate(n,beta,normal){const X=[],y=[];for(let i=0;i<n;i++){let row=[];for(let block=0;block<4;block++){let shared=normal();for(let j=0;j<5;j++)row.push(Math.sqrt(CORR)*shared+Math.sqrt(1-CORR)*normal());}X.push(row);y.push(1+row.reduce((a,x,j)=>a+x*beta[j],0)+NOISE*normal());}return {X,y};}
+const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+function prepare(train){const n=train.y.length,mu=Array.from({length:P},(_,j)=>mean(train.X.map(r=>r[j]))),sd=mu.map((m,j)=>Math.sqrt(mean(train.X.map(r=>(r[j]-m)**2)))),ym=mean(train.y),X=train.X.map(r=>r.map((x,j)=>(x-mu[j])/sd[j])),y=train.y.map(t=>t-ym),G=Array.from({length:P},()=>Array(P).fill(0)),z=Array(P).fill(0);for(let j=0;j<P;j++){for(let i=0;i<n;i++){z[j]+=X[i][j]*y[i]/n;for(let k=0;k<P;k++)G[j][k]+=X[i][j]*X[i][k]/n;}}return {mu,sd,ym,G,z};}
+function solveRidge(G,z,lambda){let M=G.map((row,j)=>[...row.map((v,k)=>v+(j===k?lambda:0)),z[j]]);for(let j=0;j<P;j++){let pivot=j;for(let k=j+1;k<P;k++)if(Math.abs(M[k][j])>Math.abs(M[pivot][j]))pivot=k;[M[j],M[pivot]]=[M[pivot],M[j]];if(Math.abs(M[j][j])<1e-12)throw new Error('Singular design matrix');for(let k=j+1;k<P;k++){let f=M[k][j]/M[j][j];for(let t=j;t<=P;t++)M[k][t]-=f*M[j][t];}}let b=Array(P).fill(0);for(let j=P-1;j>=0;j--){let v=M[j][P];for(let k=j+1;k<P;k++)v-=M[j][k]*b[k];b[j]=v/M[j][j];}return b;}
+function solveLasso(G,z,lambda,initial){let b=initial.slice();for(let iter=0;iter<12000;iter++){let delta=0;for(let j=0;j<P;j++){let r=z[j];for(let k=0;k<P;k++)if(k!==j)r-=G[j][k]*b[k];let next=Math.sign(r)*Math.max(Math.abs(r)-lambda,0)/G[j][j];delta=Math.max(delta,Math.abs(next-b[j]));b[j]=next;}if(delta<1e-10)return b;}throw new Error('LASSO failed to converge');}
+function originalModel(pre,b){let beta=b.map((v,j)=>v/pre.sd[j]),intercept=pre.ym-beta.reduce((a,v,j)=>a+v*pre.mu[j],0);return {beta,intercept};}
+function rmse(data,model){return Math.sqrt(mean(data.y.map((y,i)=>(y-model.intercept-data.X[i].reduce((a,v,j)=>a+v*model.beta[j],0))**2)));}
+function makeFit(name,lambda,b,pre,train,val){const model=originalModel(pre,b);return {name,lambda,...model,train:rmse(train,model),val:rmse(val,model),nonzero:b.filter(v=>Math.abs(v)>1e-9).length};}
+function fitExperiment(scenario,n,seed){const normal=rngFromSeed(seed),truth=Array.from({length:P},(_,j)=>scenario==='sparse'?(j===0?2:j===1?-1.5:j===2?1:0):(j%2?-1:1)*(.45+.10*(j%5)));const train=simulate(n,truth,normal),val=simulate(NVAL,truth,normal),test=simulate(NTEST,truth,normal),pre=prepare(train);const olsB=solveRidge(pre.G,pre.z,0),ols=makeFit('OLS',0,olsB,pre,train,val);let lambdas=[0,...Array.from({length:49},(_,i)=>10**(-4+5*i/48))],ridgeFits=[],lassoFits=[],warm=olsB;for(let l of lambdas){let r=solveRidge(pre.G,pre.z,l);warm=l===0?olsB:solveLasso(pre.G,pre.z,l,warm);ridgeFits.push(makeFit('Ridge',l,r,pre,train,val));lassoFits.push(makeFit('LASSO',l,warm,pre,train,val));}const best=arr=>arr.reduce((a,b)=>b.val<a.val?b:a),chosen=[ols,best(ridgeFits),best(lassoFits)];for(let f of chosen)f.test=rmse(test,f);return {truth,chosen,ridgeFits,lassoFits};}
+function coefficientComparison(exp){const svg=document.getElementById('coefficientComparison'),left=55,right=982,top=15,bottom=264, max=Math.max(1,...exp.truth.map(Math.abs),...exp.chosen.flatMap(f=>f.beta.map(Math.abs))),limit=Math.ceil(max*2)/2+.25,Y=v=>top+(bottom-top)*(limit-v)/(2*limit),step=(right-left)/P;let out=`<rect x="${left}" y="${top}" width="${right-left}" height="${bottom-top}" fill="#fafcfe" stroke="#e0e6ee"/>`;for(let i=-2;i<=2;i++){let v=i*limit/2;out+=line(left,Y(v),right,Y(v),i===0?'#8999aa':'#e0e6ee',i===0?1.4:1);out+=txt(left-7,Y(v)+4,v.toFixed(1),'text-anchor="end"');}out+=txt(12,top+12,'β','font-size="14"');for(let j=0;j<P;j++){let cx=left+step*(j+.5);if(j%5===0&&j>0)out+=line(left+step*j,top,left+step*j,bottom,'#bfcbd7',1,'stroke-dasharray="4 4"');for(let m=0;m<3;m++){let f=exp.chosen[m],v=f.beta[j],x=cx+(m-1)*10;let y=Y(v),zero=Y(0);if(Math.abs(v)<1e-9)out+=line(x-3,zero,x+3,zero,methodColors[f.name],3);else out+=`<rect x="${x-3.5}" y="${Math.min(y,zero)}" width="7" height="${Math.abs(zero-y)}" fill="${methodColors[f.name]}" rx="1"/>`;}out+=dot(cx,Y(exp.truth[j]),3.8,'#243448','white',1);out+=txt(cx,bottom+17,'X'+(j+1),'text-anchor="middle" font-size="10"');}out+=txt((left+right)/2,305,'Predictor','text-anchor="middle" font-size="12"');svg.innerHTML=out;}
+function validationPlot(exp){const svg=document.getElementById('validationPlot'),left=48,right=455,top=14,bottom=214,ols=exp.chosen[0].val,all=[ols,...exp.ridgeFits.map(f=>f.val),...exp.lassoFits.map(f=>f.val)],min=Math.min(...all),max=Math.max(...all),pad=Math.max(.07,(max-min)*.12),lo=Math.max(0,min-pad),hi=max+pad,X=l=>left+(Math.log10(l)+4)/5*(right-left),Y=v=>bottom-(v-lo)/(hi-lo)*(bottom-top);let out=`<rect x="${left}" y="${top}" width="${right-left}" height="${bottom-top}" fill="#fafcfe" stroke="#e0e6ee"/>`;for(let i=0;i<=4;i++){let v=lo+(hi-lo)*i/4;out+=line(left,Y(v),right,Y(v));out+=txt(left-6,Y(v)+4,v.toFixed(2),'text-anchor="end"');}for(let e=-4;e<=1;e++){let l=10**e;out+=line(X(l),top,X(l),bottom);out+=txt(X(l),bottom+16,l.toString(),'text-anchor="middle" font-size="10"');}out+=line(left,Y(ols),right,Y(ols),methodColors.OLS,1.8,'stroke-dasharray="5 4"');for(let m of ['Ridge','LASSO']){let fits=m==='Ridge'?exp.ridgeFits:exp.lassoFits,best=exp.chosen.find(f=>f.name===m);out+=path(fits.filter(f=>f.lambda>0).map(f=>[X(f.lambda),Y(f.val)]),methodColors[m],2.4);out+=dot(best.lambda>0?X(best.lambda):left,Y(best.val),5,methodColors[m]);}out+=txt((left+right)/2,250,'λ (log scale; zero shown at left if selected)','text-anchor="middle" font-size="11"');out+=txt(left,10,'Validation RMSE','font-size="10"');svg.innerHTML=out;}
+function renderPractice(){const scenario=document.getElementById('scenario').value,n=Number(document.getElementById('sampleSize').value);document.getElementById('trainCount').textContent=n;document.getElementById('seedValue').textContent=seed;const exp=fitExperiment(scenario,n,seed),best=exp.chosen.reduce((a,b)=>b.test<a.test?b:a);const fmtL=l=>l===0?'0':l<.001?l.toExponential(2):l.toFixed(4).replace(/0+$/,'').replace(/\.$/,'');document.getElementById('resultsBody').innerHTML=exp.chosen.map(f=>`<tr><td class="method-${f.name.toLowerCase()}"><strong>${f.name==='OLS'?'OLS (no penalty)':f.name}</strong></td><td>${fmtL(f.lambda)}</td><td>${fixed(f.train,3)}</td><td>${fixed(f.val,3)}</td><td>${f===best?'<strong>':''}${fixed(f.test,3)}${f===best?'</strong>':''}</td><td>${f.nonzero}/${P}</td></tr>`).join('');let l=exp.chosen[2],r=exp.chosen[1];document.getElementById('resultInsight').textContent=`In this simulation, ${best.name} has the lowest test RMSE (${fixed(best.test,3)}). LASSO retains ${l.nonzero} of ${P} predictors, while ridge retains ${r.nonzero}. ${scenario==='sparse'?'The true model has only 3 relevant predictors; examine which estimated coefficients are zero and whether relevant predictors are retained.':'All 20 predictors truly contribute; check whether LASSO removes useful small effects and whether ridge improves prediction.'} This is one realization, not a universal ranking.`;coefficientComparison(exp);validationPlot(exp);}
+let practicalReady=false;
+function switchTab(which){const geom=which==='geometry';for(let [id,active] of [['tabGeometry',geom],['tabPractice',!geom]]){let el=document.getElementById(id);el.setAttribute('aria-selected',active);el.tabIndex=active?0:-1;}document.getElementById('geometryTab').hidden=!geom;document.getElementById('practiceTab').hidden=geom;if(!geom&&!practicalReady){renderPractice();practicalReady=true;}}
+const tabs=[document.getElementById('tabGeometry'),document.getElementById('tabPractice')];tabs[0].addEventListener('click',()=>switchTab('geometry'));tabs[1].addEventListener('click',()=>switchTab('practice'));tabs.forEach((el,i)=>el.addEventListener('keydown',e=>{if(['ArrowRight','ArrowLeft','Home','End'].includes(e.key)){e.preventDefault();let j=e.key==='Home'?0:e.key==='End'?1:1-i;tabs[j].click();tabs[j].focus();}}));
+document.getElementById('scenario').addEventListener('change',renderPractice);document.getElementById('sampleSize').addEventListener('change',renderPractice);document.getElementById('newData').addEventListener('click',()=>{seed=(seed+1)>>>0;renderPractice();});
+
+</script>
+</body>
+</html>
